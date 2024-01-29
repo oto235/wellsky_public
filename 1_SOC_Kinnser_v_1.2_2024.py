@@ -1,0 +1,2485 @@
+import sys, time, traceback
+from datetime import date, timedelta, datetime
+sys.path.append("C:\\Users\\oto23\\mu_code\\CHH_scripts")
+import chh, utils
+# version 1.10
+branch =              0  # 0 = Austin      1 = San Antonio
+SOC_ROC_note =        1
+fill_out_note =       1
+print_forcura_blurb = 1
+ROC =                 0
+# TODO dialysis put in program, reasons for wrong answers on cog page,
+# TODO ROC supervisory aide visit page,
+# TODO add html search on med page for specific class of meds
+
+
+# SOC FOLDER  PT POC   DRESSING   INFECTION   DVT'S   PAIN   BM   WBAT   FALL RISK   AD
+subjectiveExtra =   "Passing gas, no BM since
+otherInPatientStay= "
+SurgicalSOC =       2'   # 0= no wounds, 1= at least one observable wound, 2= non-observable wounds only
+
+# my variables
+myTemp =            "
+myTempTime =        "
+visitStartTime =    "
+visitEndTime =      "
+evalDate =          "01-21-2024" "    # MM-DD-YYYY
+
+patientName =       "
+MR_not_used =       "
+ptPhone =           "
+address1 =          "
+address2 =          "
+physician =         "  # leave out 'Dr.', 'borick, catlett, dodgin, golderg, heinrich, hyde, manuel, michel, moghimi, nwelue' already loaded
+physicianPhone =    "
+
+caregiverName =     "
+caregiverPhone =    ["
+caregiverRltnshp =  "
+# spouse =            "
+# spousePhone =       ["
+
+age =               "
+DOB_not_used =      "
+gender =            "  # 'man' or 'woman'
+insurance =         "mcr"  "mcrother" "com
+previousPatient =   '
+pta =               "
+CM =                "Cheryl Campbell   Sheri Wariakois
+
+# patient variables
+PMH =               "
+PSxH =              "  # optional (empty str if none)
+dm =                '
+insulin =           '
+diagnosis_3_plus =  '
+
+# allergies =
+# pharmacy =
+# phone =
+
+
+
+side =              "
+joint =             "
+cause =             "DJD       # {cause} led to ... {effect}
+effect =            "T
+medDx =             "Aftercare following joint replacement surgery ("+side.upper()+" "+joint.upper()+" "+effect+")" "
+approach =          ""  "# anterior | posteriolateral | posterior  - HIPS only
+F2Fdate =           "
+medEventDate =      F2Fdate"          # sxDate
+dcedFrom =          "          # 'cprmc' | 'nwh' | 'sdmc' | 'sdsh' | 'west' are preloaded
+sxLocation =        dcedFrom"
+dcDate =            "
+wbStatus =          "
+
+physicianFU =       "  # MM-DD-YYYY
+
+physicianOthers =   "PCP - Dr. _____ at 512- ____
+
+ptFreq =            " # Dodgin, Heinrich 1w1, 3w1, 2w4; Manuel 1,4,3,2; Michel 1w1, 3w1, 2w3, 'freqName_...' will be reformatted to '1w1, ...'
+visitCount =        "
+nurseFreq =         ""
+otFreq =            ""
+stFreq =            ""
+MSWfreq =           ""
+HHAfreq =           ""
+otherDiscFreqEff =  ""
+needToCallMonday =  0'
+
+goal =              "Return to
+PTPOCfocus =        "Joint rehab per protocol, gait, balance, transfers, ROM, and strengthening.
+
+# Patient vitals - any integer
+ptTemp =            "
+ptPulse =           '
+ptO2 =              '
+ptLBP =             "
+ptRBP =             "
+ptRR =              '
+pain =              "
+capRefill =         "good
+lastBM =            "  # MM-DD-YYYY
+lungsounds =        "upper, lower lobes
+pain_Sleep =        '  # 0 = NA, 1 = Rarely or none, 2 = Occasionally, 3 = Frequently, 4 = Near constant, 8 = Unable to answer
+pain_TA =           4'  # 0 = NA, 1 = Rarely or none, 2 = Occasionally, 3 = Frequently, 4 = Near constant, 8 = Unable to answer
+pain_DD =           4'  # 1,2,3,4,8 options only (no 0)
+
+
+# COVID Screen
+fmTemp =            ""
+cgTemp =            ""
+# N | Y  if Y, then explain:
+CV19ss =            "N"
+CV19contact =       "N"
+CV19travel =        "N"
+
+# additional questions
+cpap =              0'
+incontinence =      0123'  # 0= none, 1=once a day linen change, 2= multiple linen changes, 3= near constant moisture
+catheterType =      ""  # optional, 'foley' or 'suprapubic'
+cathChanged =       ""  # optional, MM-DD-YYYY
+cog_impairment =    0'
+anxiety =           0123'  # 0= none, 1= not daily, 2 = daily, 3 = all the time
+phq2 =              0'  # not used in program
+social_isol =       '
+psychosocial_factors = "none
+
+c_rep_3_words =     0123' # C0200  how many words correct?
+c_year =            0123'  # 0 = missed by > 5 years, 1 = 2-5 years off, 2 = one year off, 3 = correct
+c_month =           012'   # 0 = missed by > month, 1 = 6 days to 1 month, 2 = accurate within 5 days
+c_day_of_week =     01'
+c_400_sock =        012'
+c_400_blue =        012'
+c_400_bed =         012'
+
+ht =                '  # inches, min = 50
+wt =                '  # pounds
+
+livingWill =        '
+MPOA =              '
+MPOAname =          "  # only if MPOA == 1
+MPOAphone =         ["  # only if MPOA == 1, enter as list
+DNR =               '
+agencyRCVDcopy =    '
+
+# vaccinations
+flu =               '
+pna =               '
+shingles =          '
+covid =             '
+
+# measurements
+fall_in_last_3_mo = 0'
+tug =               "  # int or str
+rom =               ["  # [flex, abd/ext]  ext for knees, abd for hips
+mmt =               ["  # [flex, abd/ext]  ext for knees, abd for hips
+
+# wounds
+# DRESSING and desciption, enter none if none, 'pico', 'prevena', 'aquacel', 'mepilex' generate specific woundCare wording
+woundLocation =     [side + " " + joint]      # make empty list for no wounds
+woundSoiled =       ["  # percentage
+woundLength =       ['  # optional, int in cm
+woundCovering =     ["PICO wound vac | PREVENA wound vac | Aquacel | Mepilex | steri-strips  #  use one of these listed, describe if not found
+woundAherence =     ["well"]"
+periwoundSkin =     ["normal tone"]"
+numberOfWounds =    len(woundLocation)
+woundCareProvided = ["none"]"
+woundCareTolerance =["N/A"]"
+woundCareCustom =   "
+# woundCareCustom will be added to end of wound care blurb in forcura, comm note, and orders
+
+woundDesc = ""
+woundDescIndiv = [] " # make this a list of individual wound descriptions. It will be concatonated to a single string 'woundDesc'
+woundDescLen = len(woundDescIndiv)
+if woundDescLen == 0:
+    for i in range(numberOfWounds):  # take out his loop and use list above to customize
+        woundDescIndiv.append(f"""{woundLocation[i].title()} surgical incision covered by {woundCovering[i]}, \
+{woundSoiled[i]}% soiled, {woundAherence[i]} adhered to skin, periwound: {periwoundSkin[i]}.""")
+
+woundDesc = " ".join(woundDescIndiv)
+
+if numberOfWounds == 0:
+    woundDesc = "No wounds."
+
+# equipment - use 0 or 1
+equipDict = {"
+'bedcommode':   0,
+'cane':         0,
+'etoiletseat':  0,
+'grabbars':     0,
+'hosbed':       0,
+'nebulizer':    0,
+'oxygen':       0,
+'tubbench':     0,
+'walker':       1,
+'wheelchair':   0   }
+
+equipDictOther = {"
+'bed_rail':         0,
+'cervical_brace':   0,
+'grabber':          0,
+'knee_immobilizer': 0,
+'lumbar_brace':     0,
+'rollator':         0,
+'sock_helper':      0,
+'shower_chair':     0
+}
+
+
+#### to fill out immediately after visit ####\
+# if unsure, leave empty string
+hearing =       0123'   # 0 = Adequate, 1 = some difficulty, 2 = Increase speaker volume, 3 = absence of useful hearing
+vision =        01234'  # 0 = Adequate, 1 = large print only,2 = limited vision, 3 = highly, 4 = severely
+health_lit =    01234'  # 0 = Never, 1 = Rarely, 2 = Sometimes, 3 = Often, 4 = Always
+delirium =      0'
+dialysis =      0'      # 1 = hemodialysis, 2 = perotoneal  Still need to code this into the program
+
+side = side.strip() + ' '
+joint = joint.strip() + ' '
+effect = effect.strip() + ' '
+if approach != "":
+    approach = approach.strip() + ' '
+
+
+newMeds =           "blood thinner ____, pain meds ____, stool softeners and laxatives ____, prophylactic antibiotic ____, NSAIDS ____, anti-nausea ____, muscle relaxant ____
+poly_pharm_4_plus = 1'
+opioid_usage =      1'
+antiplatelet =      1'  # aspirin, clopidogrel (Plavix)
+anticoagulant =     0'  # Apixaban (Eliquis), Enoxaparin (Lovenox), rivaroxaban (Xarelto), Coumadin, Warfarin, Heparin
+antibioticPRO =     0'
+antibioticUTI =     0'
+UTI =               0'
+painPump =          0'
+M2030 =             "NA" " # injectable meds 00=ind, 01=dep prep, 02= real-time reminder, 03=unable, NA = no inj meds
+meds_chemo =        0'
+hypoglycemic_usage =0'  # examples: Ozempic, Actos, Mounjaro
+endocrine_dx =      0'
+cardiac_dx =        1'
+
+medInteraction =    0'
+medInterFollowUp =  0'
+
+
+PLOF = "Able to ambulate in community for five minutes without assistive device.
+
+
+livingSituation = """Patient lives in a ____ story house with ____ spouse.  Spouse ____ helps with ADL's, IADL's, \
+and medication management.  No ____ barriers to learning.  \
+No hazards.____ """  " # keep 'no hazards' if no stairs, narrow, pets, or cluttered/soiled items
+
+subjective = f"""Patient found ____ alert and agreeable to therapy.  Pain currently at {pain[1]}. Best is {pain[0]}. \
+Worst is {pain[2]}. {subjectiveExtra}""" "
+
+
+treatment = f"""Instructed patient in safe transfers, using 1-2 hands on ____ stable surface, and \
+focusing on controlling movements.  Verbal cueing improved and reinforced safety.
+
+Instructed patient in balance activities times ____ minutes. Losses of balance: ____.  \
+Cueing improved safety.
+
+TUG: {tug} seconds.
+
+Instructed patient in gait training focusing on safe gait, appropriate heel to toe sequence, \
+appropriate step length using ____ .  Cueing improved gait form.
+
+Instructed patient in therapeutic exercises times ten reps including ____.  \
+Cueing required to improve form with ____.
+
+Patient tolerated therapy well. ____<move this section down to Treatment...>____
+""" "
+
+if ptFreq.lstrip().startswith('freq'):
+    extra1, extra2, freqTemp = ptFreq.partition('_')
+    ptFreq = freqTemp.replace('_', ', ')
+
+painPumpBlurb = ""
+painPumpOrders = ""
+if painPump == 1:
+    painPumpBlurb = "Pain pump present."
+    painPumpOrders = "Home health clinician may remove pain pump catheter once medication is fully dispensed or upon MD/patient request. Apply Band-Aid or similar dressing if needed."
+
+catheterBlurb = ""
+if catheterType != "":
+    catheterBlurb = f'{catheterType.upper()} catheter present.'
+
+# date manipulation
+medEventDateObject = datetime.strptime(medEventDate, "%m-%d-%Y")
+medEventDateDay = medEventDateObject.strftime("%A")
+POD7Object = medEventDateObject + timedelta(7)
+POD7DD = POD7Object.strftime("%m-%d-%Y, %A")
+
+# forcura blurbs have woundCare "added" at the very end of program
+forcuraBlurb = f"""Good day team, patient {patientName}. {cause} led to \
+{approach}{side}{joint}{effect}performed by Dr. {physician} on {medEventDate}, {medEventDateDay}. \
+{woundDesc} Last BM: {lastBM}. PT POC: {ptFreq} to focus on {PTPOCfocus} ____ \
+Lives in ____ {painPumpBlurb} {catheterBlurb}""" "
+
+if SurgicalSOC == 0:
+    forcuraBlurb = f"""Good day team, patient {patientName}. {cause} led to \
+{approach}{side}{joint}{effect} on {medEventDate}. Followed by Dr. {physician}. \
+{woundDesc} Last BM: {lastBM}. PT POC: {ptFreq} to focus on {effect} rehab including {PTPOCfocus}. ____ \
+Lives in ____ {painPumpBlurb} {catheterBlurb}""" "
+
+
+patient_care_prefs = "
+
+# Braden dict.
+braden = {"
+'sensory':   4,  #                                                            3= some sensory impairment, 4= no sensory impairment
+'moisture':  4 - incontinence,  #
+'activity':  4,  # 1= bedfast,                  2= chairfast, NWB,            3= walks occassional short, 4= walks every 2 hours
+'mobility':  3,  # 1= completely immobile,      2= occasional slight changes, 3= frequent slight changes, 4= frequent major changes
+'nutrition': 3,  # 1= never eats complete meal, 2= rarely eats complete meal, 3= eats half+ of each meal, 4= eats most of every meal
+'friction' : 2   # 1= mod to max assist,        2= min assist,                3= no assist
+}
+braden_score = 0
+for k,v in braden.items():
+    braden_score += v
+
+# Norton Pressue
+norton = {'
+'physical_condition':   4,  # 4 = Good, 3 = fair, 2 = poor, 1 = very bad
+'mental_condition':     4,  # 4 = Alert, 3 = apathetic, 2 = confused, 1 = stuporous
+'activity':             4,  # 4 = Ambulant, 3 = walk with help, 2 = chairbound, 1 = bedfast
+'mobility':             4,  # 4 = full, 3 = slightly impaired, 2 = very limited, 1 = immobile
+'incontinence':         4 - incontinence
+}
+norton_score = 0
+for k,v in norton.items():
+    norton_score += v
+
+# remaining MAHC items on ADL's page
+visual_impairment =  012'
+
+# Special Treatments, Procedures, and Programs
+spec_Trtmts = {'
+'chemo_IV':         0,
+'chemo_oral':       0,
+'radiation':        0,
+'oxygen':           equipDict['oxygen'],
+'suctioning':       0,
+'tracheostomy_care':0,
+'invase_mech_vent': 0,
+'nn_invase_mch_vnt':cpap,
+'cpap':             cpap,
+'IV_meds':          0,
+'transfusions':     0,
+'dialysis':         dialysis,
+'IV_access':        0  # central, PICC, port
+}
+
+spec_Trtmts_count = 0
+for k,v in spec_Trtmts.items():
+    spec_Trtmts_count += v
+
+# M1033 hospital risk assessment
+hospRiskAss = {"
+'HSTRY_FALLS':      0,  # 1 History of falls (2 or more falls - or any fall with an injury - in the past 12 months)
+'UNINT_WGHTLOSS':   0,  # 2 Unintentional weight loss of a total of 10 pounds or more in the past 12 months
+'MULT_HOSPZTN':     0,  # 3 Multiple hospitalizations (2 or more) in the past 6 months
+'MULT_EMERG_VISIT': 0,  # 4 Multiple emergency department visits (2 or more) in the past 6 months
+'RCNT_DCLN':        0,  # 5 Decline in mental, emotional, or behavioral status in the past 3 months
+'COMPLIANCE':       0,  # 6 Reported or observed history of difficulty complying with any medical instructions (for example, medications, diet, exercise) in the past 3 months
+'5PLUS_MDCTN':      1,  # 7 Currently taking 5 or more medications
+'EXHAUSTION':       1,  # 8 Currently reports exhaustion
+'OTHR':             1,  # 9 Other risk(s) not listed in 1-8
+'NONE_ABOVE':       0   # 10 None of the above (this will wipe all others out)
+}
+
+m1033_comment = "Recent change in meds
+if opioid_usage == 1:
+    m1033_comment += ", opioid usage"
+if numberOfWounds > 0:
+    m1033_comment += ", wound, risk of infection"
+
+
+
+# M1800 questions and my default answers, adjust if needed
+"
+M1800 = "02"  # grooming, 1 = can do it if groom tools within reach, 2 = needs help
+M1810 = "02"  # upper body dressing, 1 = can do it handed items, 2 = needs help
+M1820 = "02"  # lower body dressing, 1 = can do it handed items, 2 = needs help
+M1830 = "03"  # bathing, 2 = intermittent help, 3 = can shower with full-time help, 4 = sponge bathe ind, 5 = sponge bathe dep, 6 = full dep
+if painPump == 1:
+    M1830 = "05"
+M1840 = "01"  # toilet trsfr, 1 = with sup, 2 = unable commode but can use bedpan, 3 = help with bedpan, 4 = full dep
+M1845 = "02"  # toilet hygiene, 2 = needs help
+M1850 = "02"  # transferring, 2 = able to bear weight and pivot, 3 = unable to bear weight
+M1860 = "03"  # ambulation, 1= one-handed device, 2 = two-handed device, 3 = able to amb w/ sup, 4 = wc ind, 5 wc dep, 6 = bed
+M1870 = "01"  # feeding, 1 = meal set-up
+
+# prior use of device, default is "none"
+"
+priorWalker = 0
+priorWheelchair = 0
+priorMotorized = 0
+
+
+# GG0130 - Self Care and my default answers
+# 06 = ind
+# 05 = setup
+# 04 = sup
+# 03 = helper < 0.5
+# 02 = helper > 0.5
+# 01 = helper = 1
+# not attempted:
+# 07 = patient refused
+# 09 = N/A, not done prior
+# 10 = enviro limits
+# 88 = med/safety concern
+GG0130SOCROC_dict = {"
+'A1' : '05',    'A2' : '06',   # eating
+'B1' : '04',    'B2' : '06',   # oral_hyg
+'C1' : '03',    'C2' : '05',   # toilet hygiene
+'E1' : '03',    'E2' : '05',   # shower
+'F1' : '04',    'F2' : '06',   # upper body dressing
+'G1' : '03',    'G2' : '05',   # lower body dressing
+'H1' : '03',    'H2' : '05'    # footwear donning/doffing
+}
+
+
+# GG0170 - mobility with my default answers, adjust if needed
+# 06 = ind
+# 05 = setup
+# 04 = sup
+# 03 = helper < 0.5
+# 02 = helper > 0.5
+# 01 = helper = 1
+# not attempted:
+# 07 = patient refused
+# 09 = N/A, not done prior
+# 10 = enviro limits
+# 88 = med/safety concern
+GG0170SOCROC_dict = {"
+'A1' : '04',    'A2' : '06',  # roll left and right
+'B1' : '04',    'B2' : '06',  # sit to lying
+'C1' : '04',    'C2' : '06',  # lying to sitting on EOB
+'D1' : '03',    'D2' : '06',  # sit to stand
+'E1' : '03',    'E2' : '05',  # chair/bed-to-chair transfer
+'F1' : '03',    'F2' : '05',  # toilet transfer
+'G1' : '03',    'G2' : '05',  # car transfer
+'I1' : '04',    'I2' : '06',  # walk 10 feet
+'J1' : '04',    'J2' : '06',  # walk 50 feet w 2 turns
+'K1' : '04',    'K2' : '06',  # walk 150 feet
+'L1' : '03',    'L2' : '05',  # walk 10 feet on uneven
+'M1' : '04',    'M2' : '06',  # 1 step
+'N1' : '88',    'N2' : '06',  # 4 steps
+                'O2' : '05',  # 12 steps
+'P1' : '03',    'P2' : '05',  # picking up object
+'Q1' : '0'  # wheelchair use
+}
+
+GG0170SOCROC_wheelchair_dict = {
+'R1' : '04',    'R2' : '06',    'RR1' : '1',  # wheel 50 feet with 2 turns, RR1: 1=manual, 2=eletric
+'S1' : '04',    'S2' : '06',    'SS1' : '1'   # wheel 150 feet, SS1: 1=manual, 2=electric
+}
+
+if GG0170SOCROC_dict['I1'] == '88' or GG0170SOCROC_dict['I1'] == '10' or GG0170SOCROC_dict['I1'] == '09' or GG0170SOCROC_dict['I1'] == '07':
+    for i in ['J1', 'K1', 'L1']:
+        GG0170SOCROC_dict.pop(i)
+
+if GG0170SOCROC_dict['M1'] == '88' or GG0170SOCROC_dict['M1'] == '10' or GG0170SOCROC_dict['M1'] == '09' or GG0170SOCROC_dict['M1'] == '07':
+    for i in ['N1', 'O1']:
+        GG0170SOCROC_dict.pop(i)
+
+
+func_impair_factors = f"Recent {effect}with muscle and joint pain, change in meds
+if numberOfWounds > 0:
+    func_impair_factors += ", wound precautions"
+if opioid_usage == 1:
+    func_impair_factors += ", opioid usage"
+
+# BIMS_score= c_rep_3_words + c_year + c_month + c_day_of_week + c_400_sock + c_400_blue + c_400_bed
+if branch == 0:
+    username = 'jasonschwarz'
+elif branch == 1:
+    username = 'jasonschwarzpt@gmail.com'
+
+pressure_sore_risk_comment = "Low Risk"
+if norton_score < 19:
+    pressure_sore_risk_comment = "Medium Risk"
+if norton_score < 14:
+    pressure_sore_risk_comment = "High Risk"
+if norton_score < 10:
+    pressure_sore_risk_comment = "Very High Risk"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##################################################################
+###########     Program below; change with caution!     ##########
+##################################################################
+
+
+##### Section 1 fo 3 - variable manipulation for later uses #####
+
+'''  for reference only
+# default vital sign parameters
+tempHigh = "100.5"  # this will change for pre-loaded physicians
+tempLow = 96
+pulseHigh = 100
+pulseLow = 60
+respHigh = 24
+respLow = 12
+sbpHigh = 170
+sbpLow = 100
+dbpHigh = 100
+dbpLow = 60
+o2Low = 90
+# if dm == 1: these will be used:
+fastBsHigh = 200
+fastBsLow = 60
+randBsHigh = 200
+randBsLow = 60
+'''
+
+# reformat preloaded phone numbers
+if physicianPhone.lstrip().startswith('ph'):
+    extra1, extra2, physicianPhoneTemp = physicianPhone.partition('_')
+    physicianPhone = physicianPhoneTemp.replace('_', '-')
+
+
+# MAHC item
+if 'no hazards' in livingSituation.lower():
+    environmental_hzds = 0
+else:
+    environmental_hzds = 1
+
+# preloaded hospitals
+if sxLocation.lower() == 'sdmc':
+    sxLocation = "St. David's Medical Center"
+elif sxLocation.lower() == 'nwh':
+    sxLocation = "Northwest Hills Surgical Hospital"
+elif sxLocation.lower() == 'west':
+    sxLocation = "Westlake Surgery Center"
+elif sxLocation.lower() == 'cprmc':
+    sxLocation = "Cedar Park Regional Medical Center"
+elif sxLocation.lower() == 'sdsh':
+    sxLocation = "St. David's Surgical Hospital"
+
+if dcedFrom.lower() == 'sdmc':
+    dcedFrom = "St. David's Medical Center"
+elif dcedFrom.lower() == 'nwh':
+    dcedFrom = "Northwest Hills Surgical Hospital"
+elif dcedFrom.lower() == 'west':
+    dcedFrom = "Westlake Surgery Center"
+elif dcedFrom.lower() == 'cprmc':
+    dcedFrom = "Cedar Park Regional Medical Center"
+elif dcedFrom.lower() == 'sdsh':
+    dcedFrom = "St. David's Surgical Hospital"
+
+
+# correct spellings
+if 'aqaucel' in woundDesc.lower():
+    woundDesc.replace('aqaucel', 'aquacel')
+
+physs = chh.Physicians()
+tempHigh, physicianFullName, woundCare, TEDhose = physs.get_phys_details(physician, woundDesc, POD7DD)
+vitals = chh.Vitals()
+
+'''
+# TED hose default orders:
+TEDhose = "TED hose _____ x 2 weeks. May take off at night."
+'''
+
+'''
+# preloaded physicians
+if physician.lower() == "borick":
+    tempHigh = "101"
+    physicianFullName = 'Jay Borick'
+    # freqBorick_1w1_unk
+    # phBorick_512_244_0766
+    if 'aquacel' in woundDesc.lower():
+        woundCare = """Leave Aquacel in place. If dressing becomes compromised or isn't sticking, \
+remove and cover drian site with Band Aid and apply dry gauze dressing to knee daily and PRN soiling. ____"""
+        # yellowStickyNote = """Leave Aquacel in place."""
+    else:
+        woundCare = """Incision to remain open to air unless drainage present. If dressing becomes \
+compromised or isn't sticking, remove and cover drian site with Band Aid and apply dry gauze dressing \
+to knee daily and PRN soiling. ____"""
+
+elif physician.lower() == "catlett":
+    tempHigh = "100"
+    physicianFullName = 'Gregory Catlett'
+    TEDhose = "No TED hose."
+    # freqSatCatlett_1w1_3w1_2w4
+    # freqSunCatlett_4w1_2w4
+    # phCatlett_512_476_2830
+    if 'aquacel' in woundDesc.lower():
+        woundCare = """Aquacel - leave on until seen in office at 12-14 days post op. If drainage \
+saturates through dressing, contact surgeon. ____ """
+    elif 'pico' in woundDesc.lower():
+        woundCare = """PICO Wound Vac - once battery runs out, cut the vac tubing closet to the patient and \
+cover with Tegaderm. May shower but do not submerge in water. ____ Keep dressing in place until return to MD. If \
+dressing becomes saturated or dislodged, call MD, do not remove. ____"""
+    else:
+        woundCare = """ ____ MD will remove sutures/staples, unless MD appt is over two weeks post op then PT may remove \
+sutures/staples at 14 days post-surgery.  ____ If hip, apply steri-strips, xeroform, gauze and tape. Contact surgeon. \
+____ If knee, if Aquacel is present leave on until seen in office at 12-14 days post op. If drainage \
+saturates through dressing, contact surgeon. ____ """
+
+elif physician.lower() == "dodgin":
+    tempHigh = "101"
+    physicianFullName = 'David Dodgin'
+    TEDhose = "No TED hose."
+    # freqSatDodgin_1w1_3w1_2w1
+    # freqSunDodgin_4w1_3w1
+    # phDodgin_512_476_2830
+    woundCare = """ ____ Leave dressing on until seen in office at 12-14 post op. If dressing starts peeling off, \
+reinforce with tegaderm. If drainage saturates through dressing, contact surgeon. If dressing becomes wet, \
+contact surgeon. MD will remove sutures/staples. """
+
+elif physician.lower() == "gerken":
+    tempHigh = "101.5"
+    physicianFullName = 'Nicholas Gerken'
+    TEDhose = "TED hose: thigh high, 22 hours a day until DCed by MD."
+    # freqSatGerken_1w1_3w1_2w1
+    # freqSunGerken_3w2
+    # phGerken_210_874_3359
+    woundCare = """All revision TKA's have incisional wound vacs. \
+Incisional wound vac to knee to remain in place x 14 days post op. Ensure good seal. Ensure unit is charged. Please \
+notify if leak detected or if canister is full. \
+If blisters form around wound, notify surgeon. Surgeon will change dressing type. \
+Sutures or staples will be removed by provider in office. ____ """
+
+elif physician.lower() == "goldberg":
+    tempHigh = "100"
+    physicianFullName = 'Tyler Goldberg'
+    TEDhose = "TED hose bilaterally daily: 24 hrs/day for 4 weeks on the operative side and 2 weeks on the non-operative \
+side."
+    # freqSatGoldberg_1w1_4w1_3w1_2w1
+    # freqSunGoldberg_4w1_3w1_2w1
+    # phGoldberg_512_856_1000
+    if 'aquacel' in woundDesc.lower():
+        woundCare = """Aquacel - When Aquacel is present leave on until 12-14 days \
+post op. Unless it is 55% saturated remove and appy xeroform, gauze, and tape. ____ """
+    elif 'prineo' in woundDesc.lower():
+        woundCare = """Leave Prineo Dermabond in place until follow up. Contact surgeon if dressing or wound is abnormal."""
+    else:
+        woundCare = """PA will remove sutures/staples, unless MD appointment is over two weeks post \
+op then PT may remove at 14 days post op.  ____ If hip, apply steri-strips, xeroform, gauze and tape. \
+____ If knee, apply steri-strips. ____ When Aquacel is present leave on until 12-14 days \
+post op. Unless it is 55% saturated remove and apply xeroform, gauze, and tape. ____ """
+
+elif physician.lower() == "gordon":
+    tempHigh = "101.5"
+    physicianFullName = 'Gregory Gordon'
+    TEDhose = "TED hose x 2 weeks. May take off at night."
+    # freqSatGordon_1w1_3w1_2w1
+    # freqSunGordon_3w2
+    # phGordon_210_390_0008
+    woundCare = """Monitor for signs of infection of dehiscence, leave dressing intact unless otherwise indicated. \
+Perform all dressing changes in a sterile fashion. Have sterile field prepped and replace with new bandage as quickly \
+as possible to limit wound exposure. \
+If a knee replacement, replace bandage at approx. 30-degree angle. \
+Report any drainage to surgeon. If wound is questionable in any way, take a picture of wound and send to surgeon then \
+upload to chart. \
+If wound has saturated original Aquacel or medline equivalent dressing prior to first change, contact surgeon. Provena wound \
+vac may need to be applied. \
+If blisters form around wound, notify surgeon. Surgeon will change dressing type. \
+Sutures or staples will be removed by provider in office. \
+Aquacel or medline equivalent dressing should be kept dry during shower with Aquaguard shields provided by the \
+hospital or Press-N-Seal. Okay to shower with Provena wound vac. Once Aquacel or medline equivalent dressing is removed at 2 \
+weeks post-op appt, okay to shower over incision. Do not submerge wound, no baths. No lotions/creams/ointments. ____ """
+
+elif physician.lower() == "heinrich":
+    tempHigh = "100"
+    physicianFullName = 'Matt Heinrich'
+    TEDhose = "TED hose x 4 weeks. May take off at night."
+    # freqSatHeinrich_1w1_4w1_3w1_2w1
+    # freqSunHeinrich_4w1_3w1_2w1
+    # phHeinrich_512_476_2830
+    if 'prevena' in woundDesc.lower():
+        woundCare = """Prevena Wound Vac Dressing - keep in place until battery expires. Patient to notify physician. \
+Clinician to remove wound vac and replace with a new Aquacel (or equivalent) dressing within 24 hours of notification."""
+    elif 'pico' in woundDesc.lower():
+        woundCare = """PICO Wound Vac - once battery runs out, cut the vac tubing closet to the patient and \
+cover with Tegaderm. May shower but do not submerge in water. ____ Keep dressing in place until return to MD. If \
+dressing becomes saturated or dislodged, call MD, do not remove. ____"""
+    else:
+        woundCare = """Keep dressing in place until return to MD. If dressing becomes saturated or dislodged, \
+call MD, do not remove. ____"""
+
+
+elif physician.lower() == "hurt":
+    self.physicianFullName = 'Joel Hurt'
+    self.TEDhose = "TED hose: Bilateral thigh high until follow up visit. May remove at night."
+    # freqHurt 6 visits in first 14 days
+    # phHurt_512_856_1000
+    if 'prineo' in woundDesc.lower():
+        self.woundCare = """No field staff dressing change of occlusive skin closure (Prineo \
+Dermabond) dressing. Dressing will be changed at doctor's office at follow up visit. If >50% \saturated contact \
+surgeon. ____"""
+    elif 'aquacel' in woundDesc.lower() or 'mepilex' in woundDesc.lower():
+        self.woundCare = """If aquacel/mepilex dressing, leave on for 7 days unless >50% \soiled (if \
+soiled, remove aquacel/mepilex dressing and replace with new aquacel/mepilex dressing until day 7). ____ If hip, \
+remove aquacel/mepilex dressing at 7 days post op and replace with new aquacel or mepilex until followup \
+visit with doctor. ____"""
+    else:
+        self.woundCare = """If normal dry dressing, may change dry dressing PRN due to drainage or if soiled. ____""
+
+
+
+
+elif physician.lower() == "hyde":
+    tempHigh = "101.5"
+    physicianFullName = 'Carolyn Hyde'
+    # phHyde_512_346_4933
+    if 'aquacel' in woundDesc.lower():
+        woundCare = """Leave Aquacel in place until follow up appointment (usually 1 week post op). Call surgeon \
+if the dressing needs changing due to leakage or it is otherwise compromised."""
+    else:
+        woundCare = """Patient or Caregiver to change incision drsg daily to every other day until followup with \
+MD as follows: Remove old drsg. Cleanse along incision with hydrogen peroxide and gauze to remove dried blood. \
+Recover incision with gauze and secure in place with TED hose. Apply ace wrap from midcalf to midthigh. \
+Instruct patient to always keep incision covered unless showering, then may cover incision with plastic wrap \
+or Tegaderm (or like product). Clinician to assess/evaluate wound(s) and dressings at each and PRN for \
+signs/symptoms of infection."""
+
+elif physician.lower() == "manuel":
+    tempHigh = "101.5"
+    physicianFullName = 'Jacob Manuel'
+    TEDhose = "TED hose x 2 weeks. May take off at night."
+    # freqSatManuel_1w1_4w1_3w1_2w1
+    # freqSunManuel_4w1_3w1_2w1
+    # phManuel_737_202_2500
+    if 'aquacel' in woundDesc.lower() or 'mepilex' in woundDesc.lower():
+        woundCare = f"""Aquacel or Mepilex - leave in place for 7 days then remove and replace with second Aquacel or \
+Mepilex.  Report any drainage to provider. Post op day 7 is {POD7DD}. ____"""
+    elif 'prevena' in woundDesc.lower():
+        woundCare = f"""Prevena wound vac - leave for 7 days and replace with Aquacel or Mepilex. Report any drainage \
+to provider. Post op day 7 is {POD7DD}. ____"""
+    elif 'pico' in woundDesc.lower():
+        woundCare = f"""PICO wound vac - cut tubing/disconnect box at 7 days and cover stump with a tegaderm UNLESS \
+saturated with drainage, water or sweat then change to Aquacel or Mepilex. Leave PICO dressing in place until surgeon \
+follow up appt. Report any drainage to provider. Post op day 7 is {POD7DD}. ____"""
+    else:
+        woundCare = """Add custom wound care here ____ """
+
+elif physician.lower() == "michel":
+    tempHigh = "100.5"
+    physicianFullName = 'David Michel'
+    TEDhose = "TED hose as needed for pain and edema control (call into office for approval). May take off at night."
+    # freqMichel_1w1_3w1_2w3
+    # phMichel_512_454_4561
+    woundCare = """Keep dressing in place until return to MD. If dressing becomes compromised, saturated, or \
+dislodged, call MD, do not remove. ____"""
+
+elif physician.lower() == "millican":
+    tempHigh = "101.5"
+    physicianFullName = 'Geoffrey Millican'
+    TEDhose = "TED hose x 2 weeks. May take off at night."
+    # freqSatMillican_1w1_3w1_2w1
+    # freqSunMillican_3w2
+    # phMillican_210_692_7400
+    woundCare = """• Report any drainage to surgeon. If wound is questionable in any way, \
+take a picture of wound and send to surgeon then upload to chart.
+• If wound has saturated original Aquacel or medline equivalent dressing
+dressing prior to first change, contact surgeon
+• If blisters form around wound, notify surgeon. Surgeon will change
+dressing type.
+• Sutures or staples will be removed by provider in office. ____"""
+
+elif physician.lower() == 'moghimi':
+    self.tempHigh = "100.5"
+    self.physicianFullName = 'Michael Moghimi'
+    self.TEDhose = "No TED hose."
+    # phMoghimi_512_476_2830
+    # MA = "Payton"
+    # freqSatMoghimi_1w1_3w1_2w4
+    # freqSunMoghimi_3w1_2w4
+    self.woundCare = """• Bandage (gauze/tape/tegaderm if present) may be removed the second day following \
+surgery. Dermabond Prineo dressing to remain on until surgeon follow-up. Surgeon to remove staples at 2 week \
+post op.
+• May cover incision as needed with gauze and tape if bleeding still occurs or for comfort measure. For heavy \
+bleeding, please notify surgeon."""
+
+elif physician.lower() == "moore":
+    self.physicianFullName = 'Dustin Moore'
+    # phMoore_512_894_2294
+    self.woundCare = """Dressing Change: \
+      1) Remove Aquacel dressing* Post op Day #7 \
+      2) Clean area with alcohol followed by chloroprep and allow to dry \
+      3) Place new Aquacel over incision (patient should have been given one from hospital) \
+      *If wound vac is in place (often for revisions or high risk) remove POD #7 and place Aquacel dressing as \
+described above unless otherwise specified."""
+
+elif physician.lower() == 'nwelue':
+    tempHigh = "101.5"
+    physicianFullName = 'Emmanuel Nwelue'
+    TEDhose = "No TED hose. ____"
+    # phNwelue_210_804_5400	
+
+    woundCare = """Nonremovable dressing in place to operative joint, unable to visualize incision. \
+Dressing must be replaced by Clinician on Post Op Day 7. Leave Adaptic / Mesh in place and change \
+outer dressing only. Report any drainage to surgeon. If incision looks questionable in any way, \
+take picture, send to Dr. Nwelue, and upload to patient chart. If blisters form around dressing, \
+notify surgeon so type of dressing may be changed. Any sutures or staples will be removed by \
+surgeon in office. Report to physician increased temperature greater than 101.5, chills, \
+increase in drainage, foul odor, redness, unrelieved pain rated above 6/ 10. Clinician to instruct \
+active care participants on symptoms of wound infection to report to physician, to include increased \
+temperature greater than 101.5, increase in drainage, foul odor, redness, unrelieved pain above 6 on \
+0-10 scale, and any other significant changes."""
+
+else:
+    woundCare = 'Monitor wound(s) for abnormalities. ____ '
+    print('Following physician not loaded into program.')
+    physicianFullName = physician
+'''
+
+if numberOfWounds == 0:
+    woundCare = "None - no wounds."
+
+# POC stuff
+if needToCallMonday == 0:
+    POCapproval = f'Dr. {physicianFullName} protocol'
+    orthoProtocol = POCapproval
+elif needToCallMonday == 1:
+    POCapproval = 'will call Monday morning'
+    orthoProtocol = 'none.'
+else:
+    POCapproval = '____'
+
+
+otherdisciplines = ""
+if nurseFreq != "":
+    if "declined" in nurseFreq:
+        otherdisciplines += f"{nurseFreq}"
+    else:
+        nurseFreq = f"{nurseFreq} effective week of {otherDiscFreqEff}"
+        otherdisciplines += "Nursing eval ordered. ____ "
+if otFreq != "":
+    if "declined" in otFreq:
+        otherdisciplines += f"{otFreq}"
+    else:
+        otFreq = f"{otFreq} effective week of {otherDiscFreqEff}"
+        otherdisciplines += "OT eval ordered. ____ "
+if ptFreq != "":
+    ptFreq = f"{ptFreq} effective {evalDate}"
+if stFreq != "":
+    if "declined" in stFreq:
+        otherdisciplines += f"{stFreq}"
+    else:
+        stFreq = f"{stFreq} effective week of {otherDiscFreqEff}"
+        otherdisciplines += "ST eval ordered. ____ "
+if MSWfreq != "":
+    if "declined" in MSWfreq:
+        otherdisciplines += f"{MSWfreq}"
+    else:
+        MSWfreq = f"{MSWfreq} effective week of {otherDiscFreqEff}"
+        otherdisciplines += "MSW eval ordered. ____ "
+if HHAfreq != "":
+    if "declined" in HHAfreq:
+        otherdisciplines += f"{HHAfreq}"
+    else:
+        HHAfreq = f"{HHAfreq} effective week of {otherDiscFreqEff}"
+        otherdisciplines += "HHA ordered. ____ "
+
+
+if otherdisciplines == "":
+    otherdisciplines = """To avoid duplication of services, no other disciplines ordered at this time."""
+
+
+# adjust PMH incluing adding DM, incontinence if not already in:
+PMHfull = PMH
+if dm == 1 and 'dm' not in PMH.lower() and 'diabetes' not in PMH.lower():
+    PMHfull += ', DM'
+if incontinence >= 1 and 'incontinence' not in PMH.lower():
+    PMHfull += ', incontinence'
+
+
+# to help with puncuation with PMHfull and PSxH
+if PSxH != "":
+    signifMedHx = f"Significant medical history includes: {PMHfull}, {PSxH}."
+if PSxH == "":
+    signifMedHx = f"Significant medical history includes: {PMHfull}."
+
+
+# relevant medical hx used in 'Orders...' and 'PT Eval...'
+relevantMedHx = f"""{cause} led to {approach}{side}{joint}{effect}performed by \
+Dr. {physicianFullName} on {medEventDate} at {sxLocation}. Patient discharged home on {dcDate}. New medications are: \
+{newMeds} {signifMedHx} {otherInPatientStay} {painPumpBlurb} {catheterBlurb}"""
+
+if SurgicalSOC == 0:
+    effect = effect.strip()
+    relevantMedHx = f"""{cause.title()} on {medEventDate} led to {approach}{side}{joint}{effect}. Assessed by \
+Dr. {physicianFullName}. {otherInPatientStay} Patient discharged home on {dcDate}. New medications are: \
+{newMeds} {signifMedHx} {painPumpBlurb} {catheterBlurb}"""
+
+if painPumpBlurb != "":
+    painPumpBlurb = f"\n{painPumpBlurb}\n"
+if catheterBlurb != "":
+    catheterBlurb = f"\n{catheterBlurb}\n"
+
+# SOC/ROC report used in 'Communication' note
+SOCrocReport = f"""SOC/ROC REPORT
+
+PT Admitted {age} yr old {gender} with primary Dx: {approach}{side}{joint}{effect}
+
+Relevant medical history: {relevantMedHx}
+
+Wound/Incision: {woundDesc}
+
+PCP/Following Doctors and phone numbers:
+Following: Dr {physicianFullName} at {physicianPhone}
+{physicianOthers}
+
+Telehealth Candidate: no
+
+Additional Risk Information or special instructions: none
+
+Last MD F2F visit: {F2Fdate}
+
+Ortho Protocol: {orthoProtocol} ____
+
+Which MD was called to approve POC: {POCapproval}
+
+Name of who POC was reported to? (RN/MA/PA): {POCapproval}
+
+Was POC approved? {POCapproval}
+
+Name of facility patient discharged from: {dcedFrom}
+
+Frequency and Duration:
+
+SN:  {nurseFreq}
+PT:  {ptFreq}
+OT:  {otFreq}
+ST:  {stFreq}
+MSW: {MSWfreq}
+HHA: {HHAfreq}
+
+Wound care: {woundCare} {woundCareCustom}
+
+PT interventions, reason for home care, plan for next visit : ____ {PTPOCfocus}
+
+Coordinated care with: reviewed calendar and plan of care with patient. Contacted scheduler, case manager, and next clinician.
+"""
+
+
+
+
+# joint specific clause for main orders
+if joint.strip() == 'knee':
+    jointOrders = """KNEE ROM goals: For total and partial knee arthroplasty: ROM goal \
+for flexion: ~90 degrees and 0 degrees extension by 2-weeks post op. ____
+"""
+elif joint.strip() == 'back' or joint.strip() == 'spine' or joint.strip() == 'lumbar':
+    jointOrders = """NO Bending, Twisting, or Lifting over 10 pounds. ____
+"""
+elif joint.strip() == 'hip' and 'posterio' in approach.lower():
+    jointOrders = """POSTERIOR HIP PRECAUTIONS: No hip flexion > 90 degrees, no adduction \
+past midline, and no internal rotation past neutral. ____
+"""
+elif joint.strip() == 'hip' and 'anterior' in approach.lower():
+    jointOrders = """Anterior hip surgery: No hip precautions. ____
+"""
+else:
+    jointOrders = '____no joint orders____'
+
+
+
+# main orders to go on POC:
+mainOrders = f"""•
+•
+Physician orders received. Admit patient to home health care for diagnosis of {medDx}.
+•      Skilled Nurse for assessment, education on disease processes, medications, and safety.
+•      PT OT ST -  Therapy to evaluate and Treat/ perform home safety evaluation - Develop \
+discipline specific Plan of Care.
+
+Clinician to perform complete system assessment.  Assess cardio-pulmonary, GU/GI, nutrition, \
+pain management, musculoskeletal, circulatory, neurological, hydration, skin integrity, \
+assess medication compliance and effectiveness, clinician can pre-fill medication box as \
+needed if patient/caregiver unable or refuses to do. Clinician to assess response to treatment \
+regimen, s/s of adverse effects of disease process, need for adjustment in response to \
+medication regimen, and need for adjustment in POC.  Report abnormal finding to health care \
+provider.
+Clinician to inform the patient/caregivers on infection control including COVID-19 and \
+measures to prevent the spread of the disease.
+
+HHA will provide PPE to be used by patient/caregiver during the HHA visit upon request.
+Clinicians will utilize infection control.
+Clinician to provide education for s/s of COVID-19 and how to protect themselves and family \
+members.  Avoid crowds or areas with a concentration of high traffic. Mild respiratory \
+symptom may want to get tested, or self-quarantine 10-14 days, stay home and avoid sick \
+individuals, wash hands, clean all high touch surfaces. Moderate to severe symptoms including \
+shortness of breath and fevers, seek medical attention or go the hospital or ER.
+
+ {otherdisciplines} ____
+
+•Home Health Agency to HOLD patient's services on admitted to inpatient facility and resume \
+care upon discharge. Clinician frequency 1W1 resume home health care.
+Agency to discharge patient while in an inpatient facility at end of certification and may \
+readmit post d/c for inpatient facility, assess health care needs 1w1.
+
+•Clinicians to assess oxygen saturation via Pulse Oximetry PRN for symptoms of SOB. Report \
+Pulse Oximetry reading < 90% to MD.
+
+• Agency may accept orders from on-call physician and any other consulting physician, \
+ancillary PA, and NP identified as providing care for patient.
+
+Generic equivalent care supplies may be substituted for all current and future orders.
+
+•Home Health Care may recertify patient for consecutive 60-day episode bases on patient \
+medical necessity extending from current certification to include all new, changed orders, \
+diagnosis, exacerbations of disease process, medication, and knowledge deficit of patient \
+and-or caregiver and-or lack of willing, able caregiver to provide essential care.
+
+DISCHARGE: Clinician to discharge patient from home health services when all goals are met, \
+is no longer homebound, patient or MD requests discharge, patient's insurance changes (agency \
+to re-admit under new policy if patient in agreement), or if patient moves out of service area.
+
+MEDICATIONS: SN or therapist to teach on new and high-risk medications, action and side \
+effects and when to notify Capitol Home Health / MD re: ineffective or adverse reactions to \
+medications.
+
+Home health clinician to develop personalized emergency plan with patient.
+
+PAIN:
+Home health clinician to assess and monitor patient's pain level and related vital signs, \
+recommend pain medication(s) as ordered only, educate and-or implement non-pharmacological \
+measures to reduce pain (e.g. ice, heat, massage, relaxation, meditation) unless \
+contraindicated (eg. no heat with active cancer or RA).  Notify physician due to unrelieved \
+pain above 6 on 0-10 pain scale.
+
+GENERAL WOUND/INCISION CARE:
+If blisters form around wound, notify surgeon. Sutures or staples will be removed by provider \
+in office.  Report any drainage to surgeon. If wound is questionable in any way, take a \
+picture of wound and send to surgeon then upload to chart.
+
+Home health clinician to instruct the patient on signs and symptoms of wound infection to \
+report to physician including increased temperature above {tempHigh}, chills, \
+increase in drainage, foul odor, redness, unrelieved pain above 6 on 0-10 scale, and any \
+other significant changes.
+
+Home health clinician to evaluate wound(s) at each dressing change and PRN for signs and symptoms \
+of infection. Report to physician increased temperature above {tempHigh}, \
+chills, increase in drainage, foul odor, redness, unrelieved pain above 6 on 0-10 scale, and \
+any other significant changes.
+
+SPECIFIC WOUND/INCISION CARE:
+{woundCare} {woundCareCustom}
+
+PT TREATMENT:
+Physical therapy treatment to focus on rehab of {side}{joint}{effect} including the following interventions:
+
+Physical therapist to teach and perform on patient: {wbStatus}, ____, transfers, gait, balance, \
+bed mobility, stairs and steps, home safety, assistive devices including walkers and canes as \
+appropriate, therapeutic exercises to all affected body regions, establish and upgrade HEP, \
+passive, active, ____ and active assisted range of motion, manual therapy, muscle re-education, and \
+non-pharmaceutical modalities for pain control.
+
+{jointOrders}
+Utilize standard agency vital signs, notify provider for temperature >{tempHigh}. ___
+Provider follow-up at 2 weeks post op.  Call surgeon if no BM after 5 days. {TEDhose}
+{painPumpBlurb} {painPumpOrders}"""
+
+
+
+
+# General interventions (everyone admit gets them)
+generalInterventions = """Patient was identified with 2+ forms of ID: DOB, name, and ____ caregiver \
+confirmation. Patient agreed w/ provision of HHC. Consents signed for care.
+
+P.T. performed whole body assessment.  VS, BM’s ______ WNL; action taken: ____ \
+Edema present at and around impairment site. Signs/sx of UTI ____ not present.
+
+P.T. completed medication reconciliation and instructed patient on new and/or current medication \
+list. Patient was ___ able to verbalize actions, side effects, and correct schedule/dosages of \
+his/her meds.
+
+Instructed patient regarding home health care, infection control measures, advanced directives. \
+Advised patient to have emergency plan including evacuation and sheltering location.
+
+Instructed patient when to call home health agency versus emergency services (911).
+
+Instructed patient to monitor for signs and symptoms of infection and blood clots.
+
+Instructed patient how to manage pain with medications listed in chart and non-pharmaceutical \
+methods and to monitor signs of symptoms of adverse reactions including constipation.
+
+Instructed patient in fall risk mitigation and home safety including using prescribed assistive \
+device, getting help from caregiver when unsafe, using appropriate lighting, wearing appropriate \
+foot coverings, using non-slip mats in bathrooms, ______ removing non-secured rugs.
+
+Discussed plan of care and frequency including wound care with patient (and family/caregivers).  \
+Therapist and patient in agreement. _____
+
+"""
+
+
+
+
+# HB ortho used on "PT Eval" page
+hbOrtho = f"Patient is homebound due to recent {effect}, \
+unsteady and unsafe ambulation, very poor balance, weakness, and abnormal transfers.  \
+Patient is at high risk for falls with serious injury due to surgery and requires assistance of \
+2 wheel walker and of another person with all transfers/ambulation and when leaving the \
+home for medically necessary appointments.\n\n"
+
+
+
+
+# Covid screen used on "PT Eval" page
+covidScreen = f"""COVID 19 Screening Requirements:
+** TIME OF SCREENING: _{myTempTime}_
+
+SCREENING OF CLINICIAN:
+Clinician Temperature prior to entry in the home/facility: _{myTemp}_
+    N  Fever or signs/symptoms of a respiratory infection such as cough, shortness of breath, \
+sore throat, chills, repeated shaking with chills, muscle pain, headache, or a new onset of \
+loss sense of taste or smell?
+    N  Has clinician had contact in the last 14 days with someone who has a confirmed diagnosis \
+of COVID-19, is under investigation for COVID-19 or is ill with the symptoms above?
+    N  Traveled within the previous 14 days to an area with sustained community transmission?
+
+SCREENING OF CLIENT AND FAMILIES PRIOR TO HOME VISIT:
+Agency staff must communicate with the client before a scheduled visit, \
+either by telephone, text message, or video conference, and conduct the \
+same screen listed above and document screening:
+Patient Temperature _{ptTemp}_   Family temperature: _{fmTemp}_\
+Caregiver temperature: _{cgTemp}_
+
+    {CV19ss} Fever or signs/symptoms of a respiratory infection such as cough, shortness \
+of breath, sore throat, chills, repeated shaking with chills, muscle pain, headache, or a new \
+onset of loss sense of taste or smell?
+    {CV19contact} Has patient/anyone in the home had contact in the last 14 days with \
+someone who has a confirmed diagnosis of COVID-19, is under investigation for COVID-19 or is \
+ill with symptoms described above?
+    {CV19travel} Traveled within the previous 14 days to an area with sustained community \
+transmission?"""
+
+
+
+
+##### Section 2 of 3 - define functions, initiate webdriver, open browser #####
+
+
+# define functions
+def PAE():
+    print(f"***** {page} AUTOFILL ERROR *****")
+    errorFile = open(f'{patientName}_{page}_error_file', 'w')
+    errorFile.write(traceback.format_exc())
+    errorFile.close()
+    print('Traceback written to file.')
+
+def pause_to_autofill():
+    input(f"AUTOFILL {page}.")
+
+def scroll_up_then_pause():
+    driver.find_element_by_tag_name('html').send_keys(Keys.HOME)
+    input(f"'Save & Cont' {page}.")
+    driver.find_element_by_id("oasisSaveContinueButton").click()  # 'save and continue'
+
+def clearLink():
+    for i in range(len(linksToClear)):
+        driver.find_element_by_id('clearLink' + str(linksToClear[i])).click()
+    input("<Enter> when all sections cleared and ready to autofill page")
+
+
+print("PTA: " + pta + " CM: " + CM + '\n')
+print(forcuraBlurb + '\n')
+print("Wound care on orders: " + woundCare + woundCareCustom + '\n')
+
+
+if __name__ == "__main__":
+
+    # these 3 lines can be removed once all sections go through utils
+    sys.path.append("C:\\users\\oto23\\AppData\\Roaming\\Python\\Python39\\site-packages")
+    from selenium import webdriver
+    from selenium.webdriver.common.keys import Keys
+
+
+    # open browser
+    # driver = webdriver.Chrome("C:\\Program Files\Google\Chrome\Application\chromedriver")
+    # driver.get("https://kinnser.net/login.cfm")
+    # userElem = driver.find_element_by_id("username")
+    # userElem.send_keys(username)
+    # userElem.send_keys(Keys.TAB) # use without password
+    # passElem = driver.find_element_by_id("password")
+    # passElem.send_keys("")
+    # passElem.submit()
+
+    # initiate webdriver
+    driver = utils.webdriver_init()
+
+    # open browswer
+    utils.open_browswer(driver, username)
+
+
+
+
+    ##### Section 3 of 3 - Autofill forms and pages #####
+
+
+    #### SOC ROC report
+    utils.comm_note(driver, patientName, text=SOCrocReport)
+    # page = "SOC ROC Report"
+    # input(f'{patientName} AUTOFILL {page}')
+    # try:
+    #     driver.find_element_by_id("CallSummary").send_keys(SOCrocReport)
+
+    # except:
+    #     PAE()
+
+
+
+
+    ##### 1 Patient Tracking
+    page = "Patient Tracking"
+    input(f'{patientName} AUTOFILL {page}')
+
+    try:
+        driver.find_element_by_id("cTO_timein").send_keys(visitStartTime)  # timeIn
+        driver.find_element_by_id("cTO_timeout").send_keys(visitEndTime)  # timeOut
+
+        driver.find_element_by_id("cTO_visitdate").click()  # visitDate
+        driver.find_element_by_id("cTO_visitdate").send_keys(evalDate)  # visit date
+
+
+        #driver.find_element_by_id("M0032_ROC_DT_NA").send_keys(Keys.SPACE)  # ROC button
+
+
+        # A1110 Language
+        if ROC == 0:
+            driver.find_element_by_id("A1110A").send_keys("English")
+            driver.find_element_by_id("A1110B_1").send_keys(Keys.SPACE)
+        elif ROC == 1:
+            print("check language selection")
+
+        if insurance == 'mcr':
+            driver.find_element_by_id('M0150_CPAY_MCARE_FFS').send_keys(Keys.SPACE)
+        elif insurance == 'mcrother':
+            driver.find_element_by_id('M0150_CPAY_MCARE_HMO').send_keys(Keys.SPACE)
+        elif insurance == 'com':
+            driver.find_element_by_id('M0150_CPAY_PRIV_INS').send_keys(Keys.SPACE)
+
+        enterCGinfo = input("Enter 'Emergency Contact'? yes or <enter>: ")
+        if 'y' in enterCGinfo.lower():
+            try:
+                driver.find_element_by_id('cEC_ContactName').send_keys(caregiverName)
+                driver.find_element_by_id('cEC_ContactRelationship').send_keys(caregiverRltnshp)
+                driver.find_element_by_id('cEC_EmergencyPhoneA').send_keys(caregiverPhone[0])
+                driver.find_element_by_id('cEC_EmergencyPhoneB').send_keys(caregiverPhone[1])
+                driver.find_element_by_id('cEC_EmergencyPhoneC').send_keys(caregiverPhone[2])
+            except:
+                print("You need to manually enter contact info. Something is not right with it.")
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 2 Administrative
+    page = "Administrative"
+    input(f'{patientName} AUTOFILL {page}')
+
+    try:
+        driver.find_element_by_id("M0090_INFO_COMPLETED_DT").click()  # assessment date
+        driver.find_element_by_id("M0090_INFO_COMPLETED_DT").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id("M0090_INFO_COMPLETED_DT").send_keys(evalDate)
+
+        driver.find_element_by_id("M0102_PHYSN_ORDRD_SOCROC_DT_NA").send_keys(Keys.SPACE)
+
+        driver.find_element_by_id("M0104_PHYSN_RFRL_DT").click()  # MD ordered date
+        driver.find_element_by_id("M0104_PHYSN_RFRL_DT").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id("M0104_PHYSN_RFRL_DT").send_keys(dcDate)
+
+        driver.find_element_by_id("M0110_01").send_keys(Keys.SPACE)  # 'early' episode
+
+        # A1250 Transportation
+        driver.find_element_by_id("A1250C").send_keys(Keys.SPACE)
+
+        # M1000 Inpatient Facilities DC'ed from
+        driver.find_element_by_id("M1000_DC_IPPS_14_DA").send_keys(Keys.SPACE)  # M1000 in-patient stay
+
+        # M1005 Inpatient DC date
+        driver.find_element_by_id("M1005_INP_DISCHARGE_DT").click()  # M1005 InP dc date
+        driver.find_element_by_id("M1005_INP_DISCHARGE_DT").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id("M1005_INP_DISCHARGE_DT").send_keys(dcDate)
+
+        # M1005 why inpatient stay
+        driver.find_element_by_id("c_m1005comment").send_keys(medDx)  # M1005comment
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 3 Vitals
+    page = "Vitals"
+    pause_to_autofill()
+    try:
+        # clear form from previous episode:
+        linksToClear = [2]
+        if previousPatient == 1:
+            clearLink()
+
+        # enter patient vitals:
+        driver.find_element_by_id("cVS_pulseradical").send_keys(ptPulse)  # pulse
+        driver.find_element_by_id("PulseRadicalRegular1").send_keys(Keys.SPACE)  # pulseReg
+        driver.find_element_by_id("cVS_temperature").send_keys(ptTemp)  # temp
+        driver.find_element_by_id("cVS_respiratory").send_keys(ptRR)  # resp
+        driver.find_element_by_id("cVS_bplsitting").send_keys(ptLBP)  # left arm bp, sitting
+        driver.find_element_by_id("cVS_bprsitting").send_keys(ptRBP)  # right arm bp, sitting
+        driver.find_element_by_id("cVS_height").send_keys(str(ht) + " inches")  # height
+        driver.find_element_by_id("cVS_weight").send_keys(str(wt) + " lbs")  # weight
+        driver.find_element_by_id("cActual2").send_keys(Keys.SPACE)  # "stated" ht and wt
+
+        # enter vital sign parameters:
+        driver.find_element_by_id("c485np_temphigh").send_keys(tempHigh)  # np_tempHigh
+        driver.find_element_by_id("c485np_templow").send_keys(vitals.temp_low)  # np_tempLow
+        driver.find_element_by_id("c485np_pulsehigh").send_keys(vitals.pulse_high)  # np_pulsehigh
+        driver.find_element_by_id("c485np_pulselow").send_keys(vitals.pulse_low)  # np_pulselow
+        driver.find_element_by_id("c485np_resphigh").send_keys(vitals.resp_high)  # np_resphigh
+        driver.find_element_by_id("c485np_resplow").send_keys(vitals.resp_low)  # np_resplow
+        driver.find_element_by_id("c485np_syshigh").send_keys(vitals.sbp_high)  # np_syshigh
+        driver.find_element_by_id("c485np_syslow").send_keys(vitals.sbp_lLow)  # np_syslow
+        driver.find_element_by_id("c485np_diashigh").send_keys(vitals.dbp_high)  # np_diashigh
+        driver.find_element_by_id("c485NP_DiasLow").send_keys(vitals.dbp_low)  # np_diaslow
+        driver.find_element_by_id("c485np_02stat").send_keys(vitals.o2_low)  # np_02stat
+        if dm == 1:
+            driver.find_element_by_id("c485np_fastbslevelgt").send_keys(vitals.fast_bs_High)
+            driver.find_element_by_id("c485np_fastbslevellt").send_keys(vitals.fast_bs_low)
+            driver.find_element_by_id("c485np_randombslevelgt").send_keys(vitals.rand_bs_high)
+            driver.find_element_by_id("c485np_randombslevellt").send_keys(vitals.rand_bs_low)
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 4 Patient History and Prognosis
+    page = "Patient History and Prognosis"
+    # pause_to_autofill()
+    try:
+        # clear form from previous episode:
+        linksToClear = [1,2,4,8]
+        if ROC == 1:
+            linksToClear = [1,2]
+        if previousPatient == 1:
+            clearLink()
+
+        # PMH list with check boxes and comments
+        driver.find_element_by_id("cMH_osteoarthritis").send_keys(Keys.SPACE)  # OA
+        driver.find_element_by_id("cMH_osteoarthritissites").send_keys(f'{side}{joint}')
+
+        if 'TKR' in effect or 'THR' in effect or 'replacement' in effect:
+            driver.find_element_by_id("cMH_jointreplacement").send_keys(Keys.SPACE)  # jointReplacementBox
+            driver.find_element_by_id("cMH_joint").send_keys(f'{side}{joint}')  # jointReplacmentComment
+
+        driver.find_element_by_id("cMH_other").send_keys(Keys.SPACE)  # 'other'
+        driver.find_element_by_id("cMH_otherdetails").send_keys(PMHfull)  # 'other' comments
+
+        if PSxH != '':
+            driver.find_element_by_id('cMH_surghistory').send_keys(Keys.SPACE)  # past sx hx
+            driver.find_element_by_id('cMH_surghistorydetails').send_keys(PSxH)  # pas sx hx comments
+
+        if incontinence >= 1:
+            driver.find_element_by_id('cMH_urinaryincont').send_keys(Keys.SPACE)
+
+        if "HTN" in PMH:
+            driver.find_element_by_id("cMH_htn").send_keys(Keys.SPACE)
+
+        # Immunizations
+        if pna == 1:
+            driver.find_element_by_id('pY').send_keys(Keys.SPACE)
+        elif pna == 0:
+            driver.find_element_by_id('pN').send_keys(Keys.SPACE)
+        if flu == 1:
+            driver.find_element_by_id('fY').send_keys(Keys.SPACE)
+        elif flu == 0:
+            driver.find_element_by_id('fN').send_keys(Keys.SPACE)
+        if covid == 1:
+            driver.find_element_by_id('add1Y').send_keys(Keys.SPACE)
+            driver.find_element_by_id('cImm_add1info').send_keys('COVID')
+
+        # Health Screeing
+        # nothing to autofill
+
+        # Advanced Directives
+        if livingWill == 1 or MPOA == 1 or DNR == 1:
+            driver.find_element_by_id('phad1').send_keys(Keys.SPACE)
+            time.sleep(1)
+            if agencyRCVDcopy == 1:
+                driver.find_element_by_id('cofaa1').send_keys(Keys.SPACE)  # for pink box
+            if agencyRCVDcopy == 0:
+                driver.find_element_by_id('cofaa2').send_keys(Keys.SPACE)  # for pink box
+        if DNR == 1:
+            driver.find_element_by_id('addnr').send_keys(Keys.SPACE)
+            # driver.find_element_by_id('pd0').send_keys(Keys.SPACE)  # can't find this on webpage
+        if DNR == 0:
+            pass
+            # driver.find_element_by_id('pd1').send_keys(Keys.SPACE)
+        if livingWill == 1:
+            driver.find_element_by_id('adlw').send_keys(Keys.SPACE)
+        if MPOA == 1:
+            driver.find_element_by_id('admpoa').send_keys(Keys.SPACE)
+            driver.find_element_by_id('admpoan').send_keys(MPOAname)
+            driver.find_element_by_id('admpoap1').send_keys(MPOAphone[0])
+            driver.find_element_by_id('admpoap2').send_keys(MPOAphone[1])
+            driver.find_element_by_id('admpoap3').send_keys(MPOAphone[2])
+
+        if livingWill == 0 and MPOA == 0 and DNR == 0:
+            driver.find_element_by_id('phad2').send_keys(Keys.SPACE)  # pink box first question
+
+        if agencyRCVDcopy == 1:
+            driver.find_element_by_id('frm_ACPrecordDocumentedYes').send_keys(Keys.SPACE)  # for purple box
+        if agencyRCVDcopy == 0:
+            driver.find_element_by_id('frm_ACPrecordDocumentedNo').send_keys(Keys.SPACE)  # for purple box
+
+        # surragate decision maker
+        driver.find_element_by_id('hs2').send_keys(Keys.SPACE)  # for pink box
+        driver.find_element_by_id('frm_ACPsurrRecordDocumentedNo').send_keys(Keys.SPACE)  # for purple box
+
+        # patient provided written/verbal info re advance directives
+        driver.find_element_by_id('pwpwvi1').send_keys(Keys.SPACE)
+
+        # prognosis
+        driver.find_element_by_id('pp3').send_keys(Keys.SPACE)
+
+        # functional limitations
+        driver.find_element_by_id('c485FI_ambulation').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485FI_endurance').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485FI_dyspnea').send_keys(Keys.SPACE)
+        if incontinence >= 1:
+            driver.find_element_by_id('c485FI_bowelincont').send_keys(Keys.SPACE)
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+    ##### 5 Hearing, Speech, and Vision
+    page = "Hearing, Speech, and Vision"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1]
+        if previousPatient == 1:
+            clearLink()
+
+        # TODO code goes here
+        driver.find_element_by_id('cSS_wnl').send_keys(Keys.SPACE)  # eyes
+        driver.find_element_by_id('cSS_nosewnl').send_keys(Keys.SPACE)  # nose
+        # B0200 Hearing
+        if hearing is not None:
+            if ROC == 0:
+                driver.find_element_by_id(f"B0200_0{hearing}").send_keys(Keys.SPACE)
+            elif ROC ==1:
+                print("check ROC selections on this page")
+            if hearing == 0:
+                driver.find_element_by_id("cSS_earswnl").send_keys(Keys.SPACE)
+        # B1000 Vision
+        if vision is not None:
+            driver.find_element_by_id(f"B1000_0{vision}").send_keys(Keys.SPACE)
+        # B1300 Health Literacy
+        if health_lit is not None:
+            driver.find_element_by_id(f"B1300_{health_lit}").send_keys(Keys.SPACE)
+
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 6 Cog, Mood, Behav
+    page = "Cog, Mood, Behav"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1]
+        if previousPatient == 1:
+            clearLink()
+
+        # Mental status
+        orientation = ['person', 'time', 'place', 'situation']
+        for thing in orientation:
+            driver.find_element_by_id(f'CA485_MS_{thing}_Ori').send_keys(Keys.SPACE)
+        # driver.find_element_by_id('CA485_MS_person_Ori').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_memoryNoProblems').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_neuroNoProblems').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_behavioralAppropriateWNL').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_moodAppropriateWNL').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_pyschosocial').send_keys(psychosocial_factors)
+
+        # C0100
+        driver.find_element_by_id('CC0100_01').send_keys(Keys.SPACE)
+
+        # C0200
+        driver.find_element_by_id(f'CC0200_0{c_rep_3_words}').send_keys(Keys.SPACE)
+
+        # C0300
+        driver.find_element_by_id(f'CC0300A_0{c_year}').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'CC0300B_0{c_month}').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'CC0300C_0{c_day_of_week}').send_keys(Keys.SPACE)
+
+        # C0400
+        driver.find_element_by_id(f'CC0400A_0{c_400_sock}').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'CC0400B_0{c_400_blue}').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'CC0400C_0{c_400_bed}').send_keys(Keys.SPACE)
+
+        # C0500 - it is autocalculated
+
+        # C1310
+        if delirium == 0:
+            driver.find_element_by_id('CC1310A_0').send_keys(Keys.SPACE)
+            driver.find_element_by_id('CC1310B_0').send_keys(Keys.SPACE)
+            driver.find_element_by_id('CC1310C_0').send_keys(Keys.SPACE)
+            driver.find_element_by_id('CC1310D_0').send_keys(Keys.SPACE)
+
+        # D 0700 Social Isolation
+        driver.find_element_by_id(f'D0700_{social_isol}').send_keys(Keys.SPACE)
+
+        # M questions
+        driver.find_element_by_id('M1700_00').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1710_00').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'M1720_0{anxiety}').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1740_BD_NONE').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1745_00').send_keys(Keys.SPACE)
+
+        if anxiety > 1:
+            driver.find_element_by_id('CA485_MS_anxious').send_keys(Keys.SPACE)
+
+        if cog_impairment == 1:
+            driver.find_element_by_id('CA485_MS_forgetful_E').send_keys(Keys.SPACE)
+            driver.find_element_by_id('M1700_01').send_keys(Keys.SPACE)
+            driver.find_element_by_id('M1710_01').send_keys(Keys.SPACE)
+            #driver.find_element_by_id('c485MS_forgetful').send_keys(Keys.SPACE)
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 7 Pref Cust Rout Act
+    page = "Pref Cust Rout Act"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [3, 4, 5]
+        if previousPatient == 1:
+            clearLink()
+
+        # TODO code goes here
+
+        driver.find_element_by_id('M2102_f_00').send_keys(Keys.SPACE)
+
+        # types of assistance
+        driver.find_element_by_id('cToF_adlfamily').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cTof_iadlfamily').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cTof_psychfamily').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cToF_assistfamily').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cToF_financefamily').send_keys(Keys.SPACE)
+
+        driver.find_element_by_id('cSA_names').send_keys('family/friends')
+
+        driver.find_element_by_id('ca2').send_keys(Keys.SPACE)
+        driver.find_element_by_id('ca4').send_keys(Keys.SPACE)
+        driver.find_element_by_id('ca6').send_keys(Keys.SPACE)
+        driver.find_element_by_id('ca8').send_keys(Keys.SPACE)
+        driver.find_element_by_id('ca10').send_keys(Keys.SPACE)
+        driver.find_element_by_id('financialAssist3').send_keys(Keys.SPACE)
+
+        driver.find_element_by_id('frm_patientCarePreferences').send_keys(patient_care_prefs)
+
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 8 Enviro Cond
+    page = "Enviro Cond"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1,2,3]
+        if previousPatient == 1:
+            clearLink()
+
+        # Safety measures
+        if anticoagulant == 1:
+            driver.find_element_by_id('c485SM_anticoagulant').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_pathclear').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_standardpos').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_emergplan').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_ambulation').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_fall').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_adls').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_devices').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_safetymeasures').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_mobsafety').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_dmesafety').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_displan').send_keys(Keys.SPACE)
+
+        driver.find_element_by_id('c485SM_riskcode').send_keys('III')
+        driver.find_element_by_id('c485SM_disastercode').send_keys('LOW')
+
+        # Safety/sanitation hazards affecting patient
+        if 'no hazards' in livingSituation.lower():
+            driver.find_element_by_id('cSH_nohazards').send_keys(Keys.SPACE)
+        if 'stairs' in livingSituation.lower():
+            driver.find_element_by_id('cSH_stairs').send_keys(Keys.SPACE)
+        if 'narrow' in livingSituation.lower():
+            driver.find_element_by_id('cSH_walkway').send_keys(Keys.SPACE)
+        if 'cluttered' in livingSituation.lower() or 'soiled' in livingSituation.lower():
+            driver.find_element_by_id('cSH_soiledarea').send_keys(Keys.SPACE)
+        if 'rug' in livingSituation.lower():
+            driver.find_element_by_id('cSH_otherdetails').send_keys('rugs ')
+        if 'pet' in livingSituation.lower():
+            driver.find_element_by_id('cSH_otherdetails').send_keys('pet(s) ')
+
+        # Fire Assessment for Patients with Oxygen
+        if equipDict['oxygen'] == 0:
+            driver.find_element_by_id('cFA_isuseoxygen').send_keys(Keys.SPACE)
+        elif equipDict['oxygen'] ==1:
+            driver.find_element_by_id('c485SM_o2').send_keys(Keys.SPACE)
+            driver.find_element_by_id('c485EMan_suppliesdmeprov').send_keys("Oxygen")
+
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 9 Functional Status
+    page = "Functional Status"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1,2,11,12,14]
+        if previousPatient == 1:
+            clearLink()
+
+        # Activities Permitted:
+        driver.find_element_by_id("c485AP_walker").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485AP_expres").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485AP_tbedchair").send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485AP_msother').send_keys(wbStatus)
+        if GG0170SOCROC_dict['Q1'] == '1':
+            driver.find_element_by_id('c485AP_wheelchair').send_keys(Keys.SPACE)
+
+        # Musculoskeletal:
+        driver.find_element_by_id("cMSk_weakness").send_keys(Keys.SPACE)  # mskWeakness
+        driver.find_element_by_id("cMSk_ambdifficult").send_keys(Keys.SPACE)  # mskAmbDifficult
+        driver.find_element_by_id("cMSk_limitmob").send_keys(Keys.SPACE)  # mskLimitMobBox
+        driver.find_element_by_id("cMSk_limitedmobdesc").send_keys(f'{side}{joint}')  # mskLimitedMobComment
+        driver.find_element_by_id("cMSk_jointstiff").send_keys(Keys.SPACE)  # mskJointStiffBox
+        driver.find_element_by_id("cMSk_jointstiffdesc").send_keys(f'{side}{joint}')  # mskJointStiffComment
+        driver.find_element_by_id("cMSk_pbalance").send_keys(Keys.SPACE)  # mskPBalance
+        driver.find_element_by_id("cMSk_assistdev").send_keys(Keys.SPACE)  # mskAssistDevBox
+        driver.find_element_by_id("cMSk_assistdevdesc").send_keys("2 wheel walker")  # mskAssistDevComment
+
+        # M1800 questions and my default answers:
+        driver.find_element_by_id("M1800_" + M1800).send_keys(Keys.SPACE)  # grooming
+        driver.find_element_by_id("M1810_" + M1810).send_keys(Keys.SPACE)  # upper body dressing
+        driver.find_element_by_id("M1820_" + M1820).send_keys(Keys.SPACE)  # lower body dressing
+        driver.find_element_by_id("M1830_" + M1830).send_keys(Keys.SPACE)  # bathing
+        driver.find_element_by_id("M1840_" + M1840).send_keys(Keys.SPACE)  # toilet trsfr
+        driver.find_element_by_id("M1845_" + M1845).send_keys(Keys.SPACE)  # toilet hygiene
+        driver.find_element_by_id("M1850_" + M1850).send_keys(Keys.SPACE)  # transferring
+        driver.find_element_by_id("M1860_" + M1860).send_keys(Keys.SPACE)  # ambulation
+
+        # MAHC 10 Risk assessment tool
+        if age == '':
+            print('Enter age: (you only get one chance)')
+            age = input()
+        # TODO  add data validation clause to ensure interger provided for age
+        if int(age) >= 65:
+            driver.find_element_by_id("a1").send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id("a2").send_keys(Keys.SPACE)
+
+        if diagnosis_3_plus == 1:
+            driver.find_element_by_id('m1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('m2').send_keys(Keys.SPACE)
+
+        if fall_in_last_3_mo == 1:
+            driver.find_element_by_id('c1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('c2').send_keys(Keys.SPACE)
+
+        if visual_impairment > 0:
+            driver.find_element_by_id('r1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('r2').send_keys(Keys.SPACE)
+
+        if environmental_hzds == 1:
+            driver.find_element_by_id('j1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('j2').send_keys(Keys.SPACE)
+
+        if poly_pharm_4_plus == 1:
+            driver.find_element_by_id('n1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('n2').send_keys(Keys.SPACE)
+
+        if cog_impairment == 1:
+            driver.find_element_by_id('e1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('e2').send_keys(Keys.SPACE)
+
+        if int(incontinence) >= 1:
+            driver.find_element_by_id("k1").send_keys(Keys.SPACE)
+        if int(incontinence) == 0:
+            driver.find_element_by_id("k2").send_keys(Keys.SPACE)
+
+        driver.find_element_by_id("s1").send_keys(Keys.SPACE)  # impaired funcational mobility
+        driver.find_element_by_id("d1").send_keys(Keys.SPACE)  # pain affecting level of function
+
+        # TUG test
+        driver.find_element_by_id("cTUGseconds").send_keys(tug)
+
+        # DME checkboxes
+        for key, value in equipDict.items():
+            if value == 1:
+                driver.find_element_by_id("c485EMan_" + key).send_keys(Keys.SPACE)
+
+        # DME other comment box
+        for key, value in equipDictOther.items():
+            if value == 1:
+                dme = str(key).replace('_', ' ')
+                driver.find_element_by_id("c485EMan_dmeother").send_keys(f'{dme}, ')
+
+        # Supplies
+        driver.find_element_by_id("c485EMan_abds").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_gauzepads").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_acewrap").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_suppliesdress").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_tape").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_alcoholpads").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_exgloves").send_keys(Keys.SPACE)
+        if catheterType.lower() == 'foley':
+            driver.find_element_by_id("c485EMan_foleycath").send_keys(Keys.SPACE)
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+
+    ##### 10 Func Abilities and Goals
+    page =  "Func Abilities and Goals"
+
+    try:
+
+        # GG0100 prior functioning
+        driver.find_element_by_id('GG0100_A').send_keys(3)  # prior self care
+        driver.find_element_by_id('GG0100_B').send_keys(3)  # prior indoor
+        driver.find_element_by_id('GG0100_C').send_keys(3)  # prior stairs
+        driver.find_element_by_id('GG0100_D').send_keys(3)  # prior cog
+        if cog_impairment == 1:
+            driver.find_element_by_id('GG0100_D').send_keys(2)
+
+        # GG0110 prior device
+        driver.find_element_by_id('GG0110_Z').send_keys(Keys.SPACE)  # Z: none
+        if priorWalker == 1:
+            driver.find_element_by_id('GG0110_D').send_keys(Keys.SPACE)  # D: walker
+        if priorWheelchair == 1:
+            driver.find_element_by_id('GG0110_A').send_keys(Keys.SPACE)  # A: wheelchair
+        if priorMotorized == 1:
+            driver.find_element_by_id('GG0110_B').send_keys(Keys.SPACE)  # B: motorized wheelchair or scooter
+
+        # GG0130 Self Care and my default answers
+        for k,v in GG0130SOCROC_dict.items():
+            driver.find_element_by_id("GG0130SOCROC_" + k).send_keys(v)
+
+        # GG0170 Mobilty and my default answers
+        for k,v in GG0170SOCROC_dict.items():
+            driver.find_element_by_id("GG0170SOCROC_" + k).send_keys(v)
+        if GG0170SOCROC_dict['Q1'] == '1':
+            for k,v in GG0170SOCROC_wheelchair_dict.items():
+                driver.find_element_by_id("GG0170SOCROC_" + k).send_keys(v)
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+    ##### 11 Bladder and Bowel
+    page =  "Bladder and Bowel"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1,6]
+        if previousPatient == 1:
+            clearLink()
+
+        # GU
+        if incontinence >= 1:
+            driver.find_element_by_id('cES_incont').send_keys(Keys.SPACE)
+            driver.find_element_by_id('M1610_01').send_keys(Keys.SPACE)
+
+        elif incontinence == 0:
+            driver.find_element_by_id('cES_wnl').send_keys(Keys.SPACE)
+            driver.find_element_by_id('M1610_00').send_keys(Keys.SPACE)
+
+        if catheterType != '':
+            driver.find_element_by_id('cES_catheter').send_keys(Keys.SPACE)
+            driver.find_element_by_id('cES_catheterlist').click()
+            driver.find_element_by_id('cES_catheterlist').send_keys(catheterType[0])
+            driver.find_element_by_id('cES_catheterchanged').click()
+            driver.find_element_by_id('cES_catheterchanged').send_keys(cathChanged)
+            driver.find_element_by_id('M1610_02').send_keys(Keys.SPACE)
+
+        driver.find_element_by_id('cES_lastBM').send_keys(Keys.SPACE)  # last BM
+        driver.find_element_by_id("cES_lastbmdate").click()
+        driver.find_element_by_id("cES_lastbmdate").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id('cES_lastbmdate').send_keys(lastBM)
+        driver.find_element_by_id('lbm2').send_keys(Keys.SPACE)  # per pt
+        driver.find_element_by_id('cES_lbmconstipation').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cc2').send_keys(Keys.SPACE)
+
+        # M1600 UTI and prophylactic treatment
+        driver.find_element_by_id('M1600_00').send_keys(Keys.SPACE)
+
+
+        if antibioticUTI == 1:
+            driver.find_element_by_id('M1600_NA').send_keys(Keys.SPACE)
+
+        if UTI == 1:
+            driver.find_element_by_id('M1600_01').send_keys(Keys.SPACE)
+
+
+        # M1620 and M1630 bowel incontinence, ostemy
+        driver.find_element_by_id('M1620_00').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1630_00').send_keys(Keys.SPACE)
+
+        # dialysis
+        driver.find_element_by_id('id2').send_keys(Keys.SPACE)
+
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+
+    ##### 12 Active Diagnosis
+    page =  "Active Diagnosis"
+
+    try:
+
+        # M1028 None box - above DM and PVD in case either = 1
+        driver.find_element_by_id("M1028_ACTV_DIAG_NOA_D").send_keys(Keys.SPACE)
+
+        # PVD clause for M1028:
+        if 'pvd' in PMH.lower():
+            driver.find_element_by_id("M1028_ACTV_DIAG_PVD_PAD_D").send_keys(Keys.SPACE)
+
+        # DM clause for M1028:
+        if dm == 1:
+            driver.find_element_by_id("M1028_ACTV_DIAG_DM_D").send_keys(Keys.SPACE)   # M1028
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+    ##### 13 Health Conditions
+    page =  "Health Conditions"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [2]
+        if previousPatient == 1:
+            clearLink()
+
+        #M1033 Risk for hospitalization
+        for key, value in hospRiskAss.items():
+            if value == 1:
+                driver.find_element_by_id('CA485_M1033_HOSP_RISK_' + key).send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_M1033_COMMENT').send_keys(m1033_comment)
+
+        # Pain
+        driver.find_element_by_id("cPS_onsetdate").click()  # SOC date
+        driver.find_element_by_id("cPS_onsetdate").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id('cPS_onsetdate').send_keys(medEventDate)
+
+        driver.find_element_by_id('cPS_locpain').send_keys(side + joint)
+        driver.find_element_by_id('cPS_intpain').send_keys(pain[1])
+        driver.find_element_by_id('cPS_duration').send_keys('constant ____')
+        driver.find_element_by_id('cPS_quality').send_keys('ache, sharp')
+        driver.find_element_by_id('cPS_painworse').send_keys('transfers, end range of motion ____')
+        driver.find_element_by_id('cPS_painbetter').send_keys('rest, position, ice, elevation, gentle ROM, paid meds ____')
+        driver.find_element_by_id('cPS_relief').send_keys(pain[0])
+        driver.find_element_by_id('cPS_meds').send_keys('refer to med list')
+        driver.find_element_by_id('cPS_effective').send_keys('good ____')
+        driver.find_element_by_id('cPS_adverse').send_keys('constipation ____')
+        driver.find_element_by_id('cPS_goal').send_keys('zero pain')
+
+        # J0510 Pain effecting sleep
+        driver.find_element_by_id(f'J0510_{pain_Sleep}').send_keys(Keys.SPACE)
+
+        # J0520 Pain interfering with TA (therapeutic activities)
+        driver.find_element_by_id(f'J0520_0{pain_TA}').send_keys(Keys.SPACE)
+
+        # J0530 Pain interfering DD (day to day) activities
+        driver.find_element_by_id(f'J0530_{pain_DD}').send_keys(Keys.SPACE)
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+
+    ##### 14 Respiratory Status
+    page =  "Respiratory Status"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1]
+        if previousPatient == 1:
+            clearLink()
+
+        # CTA
+        driver.find_element_by_id('cRes_cta').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cRes_ctatext').send_keys(lungsounds)
+
+        # driver.find_element_by_id('cRes_wnl').send_keys(Keys.SPACE)  # resp
+        driver.find_element_by_id('cRes_o2sat').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cRes_o2sattext').send_keys(str(ptO2))
+        driver.find_element_by_id('M1400_02').send_keys(Keys.SPACE)
+
+        if equipDict['oxygen'] == 0:
+            driver.find_element_by_id('cRes_o2satlist').click()
+            driver.find_element_by_id('cRes_o2satlist').send_keys('r')
+
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 15 Endocrine
+    page =  "Endocrine"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1]
+        if previousPatient == 1:
+            clearLink()
+
+        if dm == 1:
+            driver.find_element_by_id('d1').send_keys(Keys.SPACE)
+        elif dm == 0:
+            driver.find_element_by_id('d2').send_keys(Keys.SPACE)
+        if dm == 0 and endocrine_dx == 0:
+            driver.find_element_by_id('cEndo_wnl').send_keys(Keys.SPACE)
+
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+    ##### 16 Cardiac Status
+    page =  "Cardiac Status"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1]
+        if previousPatient == 1:
+            clearLink()
+        if cardiac_dx == 0:
+            driver.find_element_by_id('cCa_wnl').send_keys(Keys.SPACE)  # WNL
+
+        driver.find_element_by_id('cCa_chestpain').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cCa_chestpaindesc').send_keys('denies')
+
+        driver.find_element_by_id('cCa_dizziness').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cCa_dizzineesdesc').send_keys('denies')
+
+        driver.find_element_by_id('cCa_edema').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cCa_edema1').send_keys(f'{side}{joint}')
+
+        driver.find_element_by_id('cCa_neckvein').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cCa_neckveindesc').send_keys('none')
+
+        driver.find_element_by_id('cCa_peripheral').send_keys(Keys.SPACE)  # peripheral pulses
+        driver.find_element_by_id('cCa_peripheraldesc').send_keys('regular')
+
+        driver.find_element_by_id('cCa_caprefill').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cr1').send_keys(Keys.SPACE)
+
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+
+    ##### 17 Swallowing_Nutritional Status  # M2102_f_01
+    page =  "Swallowing_Nutritional Status"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1,2,6]
+        if previousPatient == 1:
+            clearLink()
+
+        # driver.find_element_by_id('cNu_nuwnl').send_keys(Keys.SPACE)  # WNL
+        driver.find_element_by_id('cNHS_otcmeds').send_keys(Keys.SPACE)  # 3 or more meds
+        if numberOfWounds > 0:
+            driver.find_element_by_id('cNHS_openwound').send_keys(Keys.SPACE)  # open wound
+
+        # K 0520 Nutritional approaches
+        driver.find_element_by_id('K0520Z1').send_keys(Keys.SPACE)
+        if dm == 1:
+            driver.find_element_by_id('K0520D1').send_keys(Keys.SPACE)
+
+        # M1060 Height and weight
+        driver.find_element_by_id('M1060_HEIGHT_NOT_ASSESSED').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1060_WEIGHT_NOT_ASSESSED').send_keys(Keys.SPACE)
+
+        # M1870 Feeding or Eating
+        driver.find_element_by_id("M1870_" + M1870).send_keys(Keys.SPACE)  # feeding
+
+        # Enter Physician's orders
+        driver.find_element_by_id('c485PO_regulardiet').send_keys(Keys.SPACE)  # regular diet
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+    ##### 18 Skin Conditions
+    page =  "Skin Conditions"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [2]
+        if previousPatient == 1:
+            clearLink()
+        # risk of ulcers?
+        driver.find_element_by_id('CA485_PUIR_riskPressureUlcerInjury_2').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_PUIR_riskAssessmentTool').send_keys('Norton Pressure Score')
+        driver.find_element_by_id('CA485_PUIR_score').send_keys(norton_score)
+        driver.find_element_by_id('CA485_PUIR_comments').send_keys(pressure_sore_risk_comment)
+
+        # Integumentary Status
+        driver.find_element_by_id('st1').send_keys(Keys.SPACE)  # skin turgor
+        driver.find_element_by_id('cIS_skinpinkwnl').send_keys(Keys.SPACE)  # skin color
+        driver.find_element_by_id('cIS_warm').send_keys(Keys.SPACE)  # warm
+        driver.find_element_by_id('cIS_incision').send_keys(Keys.SPACE)  # incision
+        driver.find_element_by_id('iY1').send_keys(Keys.SPACE)  # instructed on infection control
+        driver.find_element_by_id('n1').send_keys(Keys.SPACE)  # nails 'good'
+
+        driver.find_element_by_id('M1306_0').send_keys(Keys.SPACE)  # pressure injury
+        driver.find_element_by_id('M1322_00').send_keys(Keys.SPACE)  # stage 1
+        driver.find_element_by_id('M1324_NA').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1330_00').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'M1340_0{SurgicalSOC}').send_keys(Keys.SPACE)
+
+        # unclick these options if no wounds
+        if numberOfWounds == 0:
+            driver.find_element_by_id('cIS_warm').send_keys(Keys.SPACE)  # warm
+            driver.find_element_by_id('cIS_incision').send_keys(Keys.SPACE)  # incision
+
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+
+
+    ##### 19 Meds
+    page =  "Meds"
+
+    try:
+
+        # N0415
+        if anticoagulant == 1:
+            driver.find_element_by_id('N0415E1').send_keys(Keys.SPACE)
+            driver.find_element_by_id('N0415E2').send_keys(Keys.SPACE)
+        if antibioticPRO ==1 or antibioticUTI == 1:
+            driver.find_element_by_id('N0415F1').send_keys(Keys.SPACE)
+            driver.find_element_by_id('N0415F2').send_keys(Keys.SPACE)
+        if opioid_usage == 1:
+            driver.find_element_by_id('N0415H1').send_keys(Keys.SPACE)
+            driver.find_element_by_id('N0415H2').send_keys(Keys.SPACE)
+        if hypoglycemic_usage == 1:
+            driver.find_element_by_id('N0415J1').send_keys(Keys.SPACE)
+            driver.find_element_by_id('N0415J2').send_keys(Keys.SPACE)
+        if antiplatelet == 1:
+            driver.find_element_by_id('N0415I1').send_keys(Keys.SPACE)
+            driver.find_element_by_id('N0415I2').send_keys(Keys.SPACE)
+        if anticoagulant + antibioticPRO + antibioticUTI + opioid_usage + hypoglycemic_usage + antiplatelet == 0:
+            driver.find_element_by_id('N0415Z1').send_keys(Keys.SPACE)
+
+        # M questions
+        driver.find_element_by_id(f'M2001_{medInteraction}').send_keys(Keys.SPACE)  # M2001 Med interaction
+        if medInteraction > 0:
+            driver.find_element_by_id(f'M2003_0{medInterFollowUp}').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M2010_01').send_keys(Keys.SPACE)  # high risk drug education
+        driver.find_element_by_id('M2020_03').send_keys(Keys.SPACE)  # mgmt of oral meds
+        driver.find_element_by_id('M2030_' + M2030).send_keys(Keys.SPACE)  # mgmt of inj meds
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 20 Spec Trtmts, Procs, and Progs
+    page =  "Spec Trtmts, Procs, and Progs"
+
+    try:
+
+        # O0110
+        if spec_Trtmts_count == 0:
+            driver.find_element_by_id('O0110Z1a').send_keys(Keys.SPACE)
+        if cpap == 1:
+            driver.find_element_by_id('O0110G1a').send_keys(Keys.SPACE)
+            time.sleep(1)
+            driver.find_element_by_id('O0110G3a').send_keys(Keys.SPACE)
+        if spec_Trtmts['oxygen'] == 1:
+            driver.find_element_by_id('O0110C1a').send_keys(Keys.SPACE)
+            time.sleep(1)
+            driver.find_element_by_id('O0110C2a').send_keys(Keys.SPACE)
+        if spec_Trtmts['chemo_IV'] == 1 or spec_Trtmts['chemo_oral'] == 1:
+            driver.find_element_by_id('O0110A1a').send_keys(Keys.SPACE)
+            time.sleep(1)
+            if spec_Trtmts['chemo_IV'] == 1:
+                driver.find_element_by_id('O0110A2a').send_keys(Keys.SPACE)
+            if spec_Trtmts['chemo_oral'] == 1:
+                driver.find_element_by_id('O0110A3a').send_keys(Keys.SPACE)
+        if spec_Trtmts['radiation'] == 1:
+            driver.find_element_by_id('O0110B1a').send_keys(Keys.SPACE)
+        if spec_Trtmts['dialysis'] == 1:
+            driver.find_element_by_id('O0110J1a').send_keys(Keys.SPACE)
+
+        # M2200 Therapy Need
+        M2200 = driver.find_element_by_id("M2200_THER_NEED_NUM")
+        M2200.send_keys(Keys.BACK_SPACE * 3)
+        M2200.send_keys(visitCount)
+
+        # Randomly placed shingles shot
+        if ROC == 0:
+            if shingles == 1:
+                driver.find_element_by_id('HasShinglesVac').send_keys(Keys.SPACE)
+            elif shingles == 0:
+                driver.find_element_by_id('DoesNotHaveShinglesVac').send_keys(Keys.SPACE)
+        elif ROC == 1:
+            print("check ROC selections")
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 21 Orders
+    page =  "Orders"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1, 2, 3, 4, 5, 6]
+        if previousPatient == 1:
+            clearLink()
+
+        # order frequency
+        driver.find_element_by_id("c485ODT_ptfreq").send_keys(ptFreq)
+        driver.find_element_by_id("c485ODT_snfreq").send_keys(nurseFreq)
+        driver.find_element_by_id("c485ODT_otfreq").send_keys(otFreq)
+        driver.find_element_by_id("c485ODT_ltfreq").send_keys(stFreq)
+        driver.find_element_by_id("c485ODT_mswfreq").send_keys(MSWfreq)
+        driver.find_element_by_id("c485ODT_hhafreq").send_keys(HHAfreq)
+
+        # main orders
+        driver.find_element_by_id("c485ODT_addorders").send_keys(mainOrders)
+
+        # rehab potential - 'good'
+        driver.find_element_by_id('cpt485RP_gachgoals').send_keys(Keys.SPACE)
+
+        # discharge plans
+        driver.find_element_by_id('cpt485DP_medstable').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cpt485DP_indhelp').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cpt485DP_discaregiver').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cpt485DP_discareself').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cpt485DP_caremanage').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cpt485DP_disgoalsmet').send_keys(Keys.SPACE)
+
+        # patient strengths
+        driver.find_element_by_id('cPStr_mlearner').send_keys(Keys.SPACE)
+        if diagnosis_3_plus == 0:
+            driver.find_element_by_id('cPStr_abmultdiag').send_keys(Keys.SPACE)
+
+        # Conclusions:
+        driver.find_element_by_id('cPStr_interneed').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cPStr_instneed').send_keys(Keys.SPACE)
+
+        # skilled intervention
+        if ROC == 0:
+            driver.find_element_by_id("cSInt_assessment").send_keys(f"{relevantMedHx} \n\n {generalInterventions}")
+            driver.find_element_by_id("cSInt_respinter").send_keys(Keys.SPACE)
+            driver.find_element_by_id("cSInt_vupt").send_keys(Keys.SPACE)
+            driver.find_element_by_id('cSInt_rdpt').send_keys(Keys.SPACE)
+            driver.find_element_by_id('cSInt_rftpt').send_keys(Keys.SPACE)
+            # title of teaching tool
+            driver.find_element_by_id("cSInt_titletool").send_keys('agency handout')
+            # progress to goals
+            driver.find_element_by_id("cSInt_proggoals").send_keys('25%')
+            # name (conferenced with)
+            driver.find_element_by_id("cSInt_confname").send_keys('Jason Schwarz')
+            # regarding
+            driver.find_element_by_id("cSInt_regarding").send_keys('P.T. POC')
+            # Physician contacted RE:
+            driver.find_element_by_id('cSInt_physcontact').send_keys(POCapproval)
+             # order changes:
+            driver.find_element_by_id('cSInt_ordchanges').send_keys('none ____')
+             # plans for next visit
+            driver.find_element_by_id("cSInt_nvisitplans").send_keys(PTPOCfocus)
+            # next physician appt
+            driver.find_element_by_id("cSInt_nvisidate").click()
+            driver.find_element_by_id("cSInt_nvisidate").send_keys(Keys.BACK_SPACE * 8)
+            driver.find_element_by_id("cSInt_nvisidate").send_keys(physicianFU)
+            # discharge planning
+            driver.find_element_by_id("cSInt_dplanning").send_keys('yes')
+
+        elif ROC == 1:
+            driver.find_element_by_id("cptSInt_assinstperform").send_keys(f"{relevantMedHx} \n\n {generalInterventions}")
+            driver.find_element_by_id("cptSInt_tolwell").send_keys(Keys.SPACE)
+            driver.find_element_by_id("cptSInt_respinter").send_keys(Keys.SPACE)
+            driver.find_element_by_id("cptSInt_vupt").send_keys(Keys.SPACE)
+            driver.find_element_by_id('cptSInt_rdpt').send_keys(Keys.SPACE)
+            driver.find_element_by_id('cptSInt_rftpt').send_keys(Keys.SPACE)
+            driver.find_element_by_id("cptSInt_titletool").send_keys('agency handout')
+            driver.find_element_by_id("cptSInt_proggoals").send_keys('25%')
+            driver.find_element_by_id("cptSInt_confname").send_keys('Jason Schwarz')
+            driver.find_element_by_id("cptSInt_regarding").send_keys('P.T. POC')
+            driver.find_element_by_id('cptSInt_physcontact').send_keys(POCapproval)
+            driver.find_element_by_id('cptSInt_ordchanges').send_keys('none ____')
+            driver.find_element_by_id("cptSInt_nvisitplans").send_keys(PTPOCfocus)
+            driver.find_element_by_id("cptSInt_nvisidate").click()
+            driver.find_element_by_id("cptSInt_nvisidate").send_keys(Keys.BACK_SPACE * 8)
+            driver.find_element_by_id("cptSInt_nvisidate").send_keys(physicianFU)
+            driver.find_element_by_id("cptSInt_dplanning").send_keys('yes')
+
+    except:
+        PAE()
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 22 Supplies Worksheet
+    page = "Supplies Worksheet"
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 23 Supplies Used This Visit
+    page =  "Supplies Used This Visit"
+
+    scroll_up_then_pause()  # pause to finish and inspect page
+
+
+    ##### 24 PT Evaluation
+    page =  "PT Evaluation"
+
+    if ROC == 1:
+        input("press Enter to print stuff")
+        print("relavent md hx")
+        print(relevantMedHx)
+        print("homebound reason")
+        print(hbOrtho, covidScreen)
+        print("living situation")
+        print(livingSituation)
+        print("subjective and extra")
+        print(subjective)
+        print("treatment")
+        print(treatment)
+        print("PTA: " + pta + " CM: " + CM + '\n')
+        print(forcuraBlurb + '\n')
+        print("Wound care on orders: " + woundCare + woundCareCustom + '\n')
+        input("pressing Enter again will run normal program")
+
+    input("Autofill AFTER loading desired template")
+
+    try:
+        # Medical Dx and date
+        driver.find_element_by_id('frm_MedDiagText').send_keys(medDx)
+
+        driver.find_element_by_id("frm_MedDiagOEDate").click()  # Med Dx date (sx date)
+        driver.find_element_by_id("frm_MedDiagOEDate").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id("frm_MedDiagOEDate").send_keys(medEventDate)
+
+        # PT date
+        driver.find_element_by_id("frm_PTDiagOEDate").click()  # PT Dx date (eval date)
+        driver.find_element_by_id("frm_PTDiagOEDate").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id("frm_PTDiagOEDate").send_keys(evalDate)
+
+        # Rel Med Hx free text box
+        driver.find_element_by_id('frm_RlvntMedHist').send_keys(relevantMedHx)
+
+        # PLOF free text box
+        driver.find_element_by_id('frm_PriorLevelFunc').send_keys(PLOF)
+
+        # Patient goals free rext box
+        driver.find_element_by_id('frm_PatientGoals').send_keys(goal)
+
+        # Precautions
+        driver.find_element_by_id('frm_PatientPrecautions').send_keys('Universal, Falls')
+        if dm == 1:
+            driver.find_element_by_id('frm_PatientPrecautions').send_keys(', Diabetic')
+        if 'hip' in joint and 'posterio' in approach.lower():
+            driver.find_element_by_id('frm_PatientPrecautions').send_keys(', Posterior Hip')
+        if 'back' in joint:
+            driver.find_element_by_id('frm_PatientPrecautions').send_keys(', Spinal')
+        if numberOfWounds > 0:
+            driver.find_element_by_id('frm_PatientPrecautions').send_keys(', Wound')
+        if opioid_usage == 1:
+            driver.find_element_by_id('frm_PatientPrecautions').send_keys(', Opioids')
+        if anticoagulant == 1:
+            driver.find_element_by_id('frm_PatientPrecautions').send_keys(', Anticoagulation')
+        if spec_Trtmts['oxygen'] == 1:
+            driver.find_element_by_id('frm_PatientPrecautions').send_keys(', Oxygen')
+
+        # Homebound section:
+        input('<Enter> for Homebound status')
+        HB = driver.find_element_by_id("cHo_homebound_cY").send_keys(Keys.SPACE)
+
+        input('<Enter> to fill out the rest')
+        # Criteria 1
+        driver.find_element_by_id("cHo_homebound_crit1Part1").send_keys(Keys.SPACE)  # HBcrit1Part1
+        driver.find_element_by_id("cHo_homebound_crit1Part2").send_keys(Keys.SPACE)  # HBcrit1Part2
+        driver.find_element_by_id("cHo_homebound_crit1Part2_specify").send_keys(hbOrtho)  # HBcrit1Specify
+
+        # Criteria 2
+        driver.find_element_by_id("cHo_homebound_crit2Part1").send_keys(Keys.SPACE)  # HBcrit2Part1
+        driver.find_element_by_id("cHo_homebound_crit2Part2").send_keys(Keys.SPACE)  # HBcrit2Part2
+        driver.find_element_by_id("cHo_homebound_crit2Part2_specify").send_keys(hbOrtho, covidScreen)  # HBcrit2Specify
+
+        # Social Support/Safety Hazards
+        driver.find_element_by_id("frm_SafetySanHaz13").send_keys(livingSituation)
+
+        # Subjective Info
+        driver.find_element_by_id("frm_SubInfo").send_keys(subjective)
+
+        # Physical Assessment
+        driver.find_element_by_id("frm_PhyAsmtSkin").send_keys(woundDesc)
+        if SurgicalSOC >= 1:
+            driver.find_element_by_id('frm_PhyAsmtCoordination').send_keys(f"Decreased around {side}{joint}")
+            driver.find_element_by_id('frm_PhyAsmtSensation').send_keys(f"Abnormal around {side}{joint}")
+            driver.find_element_by_id('frm_PhyAsmtEdemaLocText').send_keys(side + joint)
+
+        # add ROM and MMT
+        if joint.strip() == 'knee' and side.strip() == 'left':
+            driver.find_element_by_id('frm_ROM94').send_keys(rom[0])  # flexion
+            driver.find_element_by_id('frm_ROM98').click()
+            driver.find_element_by_id('frm_ROM98').send_keys(Keys.BACK_SPACE * 3)
+            driver.find_element_by_id('frm_ROM98').send_keys(rom[1])  # ext
+            driver.find_element_by_id('frm_ROM96').send_keys(mmt[0])  # flexion mmt
+            driver.find_element_by_id('frm_ROM100').click()
+            driver.find_element_by_id('frm_ROM100').send_keys(Keys.BACK_SPACE * 2)
+            driver.find_element_by_id('frm_ROM100').send_keys(mmt[1])  # ext mmt
+
+        if joint.strip() == 'knee' and side.strip() == 'right':
+            driver.find_element_by_id('frm_ROM93').send_keys(rom[0])  # flexion
+            driver.find_element_by_id('frm_ROM97').click()
+            driver.find_element_by_id('frm_ROM97').send_keys(Keys.BACK_SPACE * 3)
+            driver.find_element_by_id('frm_ROM97').send_keys(rom[1])  # ext
+            driver.find_element_by_id('frm_ROM95').send_keys(mmt[0])  # flexion mmt
+            driver.find_element_by_id('frm_ROM99').click()
+            driver.find_element_by_id('frm_ROM99').send_keys(Keys.BACK_SPACE * 2)
+            driver.find_element_by_id('frm_ROM99').send_keys(mmt[1])  # ext mmt
+
+        if joint.strip() == 'hip' and side.strip() == 'left':
+            # rom
+            driver.find_element_by_id('frm_ROM70').send_keys(rom[0])  # flexion rom
+            driver.find_element_by_id('frm_ROM74').click()
+            driver.find_element_by_id('frm_ROM74').send_keys(Keys.BACK_SPACE * 3)  # erase extension autofill
+            driver.find_element_by_id('frm_ROM78').send_keys(rom[1])  # abd rom
+            driver.find_element_by_id('frm_ROM82').click()
+            driver.find_element_by_id('frm_ROM82').send_keys(Keys.BACK_SPACE * 3)  # erase adduction autofill
+            # mmt
+            driver.find_element_by_id('frm_ROM72').send_keys(mmt[0])  # flexion mmt
+            driver.find_element_by_id('frm_ROM76').click()
+            driver.find_element_by_id('frm_ROM76').send_keys(Keys.BACK_SPACE * 3)  # erase extension mmt autofill
+            driver.find_element_by_id('frm_ROM80').send_keys(mmt[1])  # abd mmt
+            driver.find_element_by_id('frm_ROM84').click()
+            driver.find_element_by_id('frm_ROM84').send_keys(Keys.BACK_SPACE * 3)  # erase adduction mmt autofill
+
+        if joint.strip() == 'hip' and side.strip() == 'right':
+            # rom
+            driver.find_element_by_id('frm_ROM69').send_keys(rom[0])  # flexion rom
+            driver.find_element_by_id('frm_ROM73').click()
+            driver.find_element_by_id('frm_ROM73').send_keys(Keys.BACK_SPACE * 3)  # erase extension autofill
+            driver.find_element_by_id('frm_ROM77').send_keys(rom[1])  # abd rom
+            driver.find_element_by_id('frm_ROM81').click()
+            driver.find_element_by_id('frm_ROM81').send_keys(Keys.BACK_SPACE * 3)  # erase adduction autofill
+            # mmt
+            driver.find_element_by_id('frm_ROM71').send_keys(mmt[0])  # flexion mmt
+            driver.find_element_by_id('frm_ROM75').click()
+            driver.find_element_by_id('frm_ROM75').send_keys(Keys.BACK_SPACE * 3)  # erase extension mmt autofill
+            driver.find_element_by_id('frm_ROM79').send_keys(mmt[1])  # abd mmt
+            driver.find_element_by_id('frm_ROM83').click()
+            driver.find_element_by_id('frm_ROM83').send_keys(Keys.BACK_SPACE * 3)  # erase adduction mmt autofill
+
+        if GG0170SOCROC_dict['Q1'] == '1':  # wheelchair use is True
+            driver.find_element_by_id('frm_FAPT36').send_keys("CGA")        # Level ground assistance
+            driver.find_element_by_id('frm_FAPT37').send_keys("Mod A x 1")  # Unlevel ground assistance
+            driver.find_element_by_id('frm_FAPT38').send_keys("CGA")        # Maneuvering assistance
+            driver.find_element_by_id('frm_FAPT39').send_keys(func_impair_factors)
+
+
+        # Functional Assessment
+        driver.find_element_by_id('frm_FAPTBedMobComments').send_keys(func_impair_factors)
+        driver.find_element_by_id('frm_FAPT35').send_keys(func_impair_factors)
+        driver.find_element_by_id('frm_FAPT22').send_keys(func_impair_factors)
+        # weightbearing status
+        driver.find_element_by_id('frm_FAPT40').send_keys(wbStatus)
+
+        # add coordination people
+        driver.find_element_by_id('frm_CareCoordName').send_keys(f", Marcy Sanchez, {CM}, {pta}")
+
+        # treatment provided
+        driver.find_element_by_id('frm_TrtmntPlanComments1').send_keys(treatment)
+
+        if numberOfWounds != 0:
+            for i in range(numberOfWounds):
+                woundNumber = str(i + 1)
+                input("Click 'Add (Another) Wound' then <Enter> when ready to autofill 'Wound " + woundNumber + "'")
+                driver.find_element_by_id(f'frm_wound{woundNumber}Location').send_keys(woundLocation[i])  # Location
+                driver.find_element_by_id(f'frm_wound{woundNumber}Type').click()
+                driver.find_element_by_id(f'frm_wound{woundNumber}Type').send_keys("su")  # type - surgical
+                driver.find_element_by_id(f'frm_wound{woundNumber}PresentOnAdmission').click()  # present on admission
+                driver.find_element_by_id(f'frm_wound{woundNumber}Treatment').send_keys(woundCareProvided[i])
+                driver.find_element_by_id(f'frm_wound{woundNumber}PatientResponseToTreatment').send_keys(woundCareTolerance[i])
+                driver.find_element_by_id(f'frm_wound{woundNumber}AdditionalInformation').send_keys(woundDescIndiv[i])
+                input("Finish this wound, click 'Save Wound', then <Enter> to continue")
+
+    except:
+        PAE()
+        input('<Enter> to acknowledge')
+
+    print('Good-bye and good luck.\n')
+    print("PTA: " + pta + " CM: " + CM + '\n')
+    print(forcuraBlurb + '\n')
+    print("Wound care on orders: " + woundCare + woundCareCustom + '\n')
