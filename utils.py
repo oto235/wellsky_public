@@ -48,7 +48,51 @@ def comm_note(driver, patientName, text):
     except:
         autofill_error(page, patientName)
 
+# 1 
+def patient_tracking(driver, patientName, visitStartTime, visitEndTime, evalDate, ROC, insurance, 
+                           caregiverName, caregiverRltnshp, caregiverPhone):
+    page = "Patient Tracking"
+    input(f'{patientName} AUTOFILL {page}')
+    try:
+        driver.find_element_by_id("cTO_timein").send_keys(visitStartTime)  # timeIn
+        driver.find_element_by_id("cTO_timeout").send_keys(visitEndTime)  # timeOut
 
+        driver.find_element_by_id("cTO_visitdate").click()  # visitDate
+        driver.find_element_by_id("cTO_visitdate").send_keys(evalDate)  # visit date
+
+
+        #driver.find_element_by_id("M0032_ROC_DT_NA").send_keys(Keys.SPACE)  # ROC button
+
+
+        # A1110 Language
+        if ROC == 0:
+            driver.find_element_by_id("A1110A").send_keys("English")
+            driver.find_element_by_id("A1110B_1").send_keys(Keys.SPACE)
+        elif ROC == 1:
+            print("check language selection")
+
+        if insurance == 'mcr':
+            driver.find_element_by_id('M0150_CPAY_MCARE_FFS').send_keys(Keys.SPACE)
+        elif insurance == 'mcrother':
+            driver.find_element_by_id('M0150_CPAY_MCARE_HMO').send_keys(Keys.SPACE)
+        elif insurance == 'com':
+            driver.find_element_by_id('M0150_CPAY_PRIV_INS').send_keys(Keys.SPACE)
+
+        enterCGinfo = input("Enter 'Emergency Contact'? yes or <enter>: ")
+        if 'y' in enterCGinfo.lower():
+            try:
+                driver.find_element_by_id('cEC_ContactName').send_keys(caregiverName)
+                driver.find_element_by_id('cEC_ContactRelationship').send_keys(caregiverRltnshp)
+                driver.find_element_by_id('cEC_EmergencyPhoneA').send_keys(caregiverPhone[0])
+                driver.find_element_by_id('cEC_EmergencyPhoneB').send_keys(caregiverPhone[1])
+                driver.find_element_by_id('cEC_EmergencyPhoneC').send_keys(caregiverPhone[2])
+            except:
+                print("You need to manually enter contact info. Something is not right with it.")
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
 
 
 

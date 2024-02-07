@@ -23,7 +23,7 @@ myTemp =            "
 myTempTime =        "
 visitStartTime =    "
 visitEndTime =      "
-evalDate =          "01-21-2024" "    # MM-DD-YYYY
+evalDate =          "02-04-2024" "    # MM-DD-YYYY
 
 patientName =       "
 MR_not_used =       "
@@ -511,7 +511,7 @@ if norton_score < 10:
 
 ##### Section 1 fo 3 - variable manipulation for later uses #####
 
-'''  for reference only
+'''
 # default vital sign parameters
 tempHigh = "100.5"  # this will change for pre-loaded physicians
 tempLow = 96
@@ -587,14 +587,7 @@ if physician.lower() == "borick":
     physicianFullName = 'Jay Borick'
     # freqBorick_1w1_unk
     # phBorick_512_244_0766
-    if 'aquacel' in woundDesc.lower():
-        woundCare = """Leave Aquacel in place. If dressing becomes compromised or isn't sticking, \
-remove and cover drian site with Band Aid and apply dry gauze dressing to knee daily and PRN soiling. ____"""
-        # yellowStickyNote = """Leave Aquacel in place."""
-    else:
-        woundCare = """Incision to remain open to air unless drainage present. If dressing becomes \
-compromised or isn't sticking, remove and cover drian site with Band Aid and apply dry gauze dressing \
-to knee daily and PRN soiling. ____"""
+
 
 elif physician.lower() == "catlett":
     tempHigh = "100"
@@ -603,18 +596,7 @@ elif physician.lower() == "catlett":
     # freqSatCatlett_1w1_3w1_2w4
     # freqSunCatlett_4w1_2w4
     # phCatlett_512_476_2830
-    if 'aquacel' in woundDesc.lower():
-        woundCare = """Aquacel - leave on until seen in office at 12-14 days post op. If drainage \
-saturates through dressing, contact surgeon. ____ """
-    elif 'pico' in woundDesc.lower():
-        woundCare = """PICO Wound Vac - once battery runs out, cut the vac tubing closet to the patient and \
-cover with Tegaderm. May shower but do not submerge in water. ____ Keep dressing in place until return to MD. If \
-dressing becomes saturated or dislodged, call MD, do not remove. ____"""
-    else:
-        woundCare = """ ____ MD will remove sutures/staples, unless MD appt is over two weeks post op then PT may remove \
-sutures/staples at 14 days post-surgery.  ____ If hip, apply steri-strips, xeroform, gauze and tape. Contact surgeon. \
-____ If knee, if Aquacel is present leave on until seen in office at 12-14 days post op. If drainage \
-saturates through dressing, contact surgeon. ____ """
+
 
 elif physician.lower() == "dodgin":
     tempHigh = "101"
@@ -623,9 +605,7 @@ elif physician.lower() == "dodgin":
     # freqSatDodgin_1w1_3w1_2w1
     # freqSunDodgin_4w1_3w1
     # phDodgin_512_476_2830
-    woundCare = """ ____ Leave dressing on until seen in office at 12-14 post op. If dressing starts peeling off, \
-reinforce with tegaderm. If drainage saturates through dressing, contact surgeon. If dressing becomes wet, \
-contact surgeon. MD will remove sutures/staples. """
+
 
 elif physician.lower() == "gerken":
     tempHigh = "101.5"
@@ -634,11 +614,7 @@ elif physician.lower() == "gerken":
     # freqSatGerken_1w1_3w1_2w1
     # freqSunGerken_3w2
     # phGerken_210_874_3359
-    woundCare = """All revision TKA's have incisional wound vacs. \
-Incisional wound vac to knee to remain in place x 14 days post op. Ensure good seal. Ensure unit is charged. Please \
-notify if leak detected or if canister is full. \
-If blisters form around wound, notify surgeon. Surgeon will change dressing type. \
-Sutures or staples will be removed by provider in office. ____ """
+
 
 elif physician.lower() == "goldberg":
     tempHigh = "100"
@@ -648,16 +624,7 @@ side."
     # freqSatGoldberg_1w1_4w1_3w1_2w1
     # freqSunGoldberg_4w1_3w1_2w1
     # phGoldberg_512_856_1000
-    if 'aquacel' in woundDesc.lower():
-        woundCare = """Aquacel - When Aquacel is present leave on until 12-14 days \
-post op. Unless it is 55% saturated remove and appy xeroform, gauze, and tape. ____ """
-    elif 'prineo' in woundDesc.lower():
-        woundCare = """Leave Prineo Dermabond in place until follow up. Contact surgeon if dressing or wound is abnormal."""
-    else:
-        woundCare = """PA will remove sutures/staples, unless MD appointment is over two weeks post \
-op then PT may remove at 14 days post op.  ____ If hip, apply steri-strips, xeroform, gauze and tape. \
-____ If knee, apply steri-strips. ____ When Aquacel is present leave on until 12-14 days \
-post op. Unless it is 55% saturated remove and apply xeroform, gauze, and tape. ____ """
+
 
 elif physician.lower() == "gordon":
     tempHigh = "101.5"
@@ -666,19 +633,7 @@ elif physician.lower() == "gordon":
     # freqSatGordon_1w1_3w1_2w1
     # freqSunGordon_3w2
     # phGordon_210_390_0008
-    woundCare = """Monitor for signs of infection of dehiscence, leave dressing intact unless otherwise indicated. \
-Perform all dressing changes in a sterile fashion. Have sterile field prepped and replace with new bandage as quickly \
-as possible to limit wound exposure. \
-If a knee replacement, replace bandage at approx. 30-degree angle. \
-Report any drainage to surgeon. If wound is questionable in any way, take a picture of wound and send to surgeon then \
-upload to chart. \
-If wound has saturated original Aquacel or medline equivalent dressing prior to first change, contact surgeon. Provena wound \
-vac may need to be applied. \
-If blisters form around wound, notify surgeon. Surgeon will change dressing type. \
-Sutures or staples will be removed by provider in office. \
-Aquacel or medline equivalent dressing should be kept dry during shower with Aquaguard shields provided by the \
-hospital or Press-N-Seal. Okay to shower with Provena wound vac. Once Aquacel or medline equivalent dressing is removed at 2 \
-weeks post-op appt, okay to shower over incision. Do not submerge wound, no baths. No lotions/creams/ointments. ____ """
+
 
 elif physician.lower() == "heinrich":
     tempHigh = "100"
@@ -687,16 +642,6 @@ elif physician.lower() == "heinrich":
     # freqSatHeinrich_1w1_4w1_3w1_2w1
     # freqSunHeinrich_4w1_3w1_2w1
     # phHeinrich_512_476_2830
-    if 'prevena' in woundDesc.lower():
-        woundCare = """Prevena Wound Vac Dressing - keep in place until battery expires. Patient to notify physician. \
-Clinician to remove wound vac and replace with a new Aquacel (or equivalent) dressing within 24 hours of notification."""
-    elif 'pico' in woundDesc.lower():
-        woundCare = """PICO Wound Vac - once battery runs out, cut the vac tubing closet to the patient and \
-cover with Tegaderm. May shower but do not submerge in water. ____ Keep dressing in place until return to MD. If \
-dressing becomes saturated or dislodged, call MD, do not remove. ____"""
-    else:
-        woundCare = """Keep dressing in place until return to MD. If dressing becomes saturated or dislodged, \
-call MD, do not remove. ____"""
 
 
 elif physician.lower() == "hurt":
@@ -704,35 +649,13 @@ elif physician.lower() == "hurt":
     self.TEDhose = "TED hose: Bilateral thigh high until follow up visit. May remove at night."
     # freqHurt 6 visits in first 14 days
     # phHurt_512_856_1000
-    if 'prineo' in woundDesc.lower():
-        self.woundCare = """No field staff dressing change of occlusive skin closure (Prineo \
-Dermabond) dressing. Dressing will be changed at doctor's office at follow up visit. If >50% \saturated contact \
-surgeon. ____"""
-    elif 'aquacel' in woundDesc.lower() or 'mepilex' in woundDesc.lower():
-        self.woundCare = """If aquacel/mepilex dressing, leave on for 7 days unless >50% \soiled (if \
-soiled, remove aquacel/mepilex dressing and replace with new aquacel/mepilex dressing until day 7). ____ If hip, \
-remove aquacel/mepilex dressing at 7 days post op and replace with new aquacel or mepilex until followup \
-visit with doctor. ____"""
-    else:
-        self.woundCare = """If normal dry dressing, may change dry dressing PRN due to drainage or if soiled. ____""
-
-
 
 
 elif physician.lower() == "hyde":
     tempHigh = "101.5"
     physicianFullName = 'Carolyn Hyde'
     # phHyde_512_346_4933
-    if 'aquacel' in woundDesc.lower():
-        woundCare = """Leave Aquacel in place until follow up appointment (usually 1 week post op). Call surgeon \
-if the dressing needs changing due to leakage or it is otherwise compromised."""
-    else:
-        woundCare = """Patient or Caregiver to change incision drsg daily to every other day until followup with \
-MD as follows: Remove old drsg. Cleanse along incision with hydrogen peroxide and gauze to remove dried blood. \
-Recover incision with gauze and secure in place with TED hose. Apply ace wrap from midcalf to midthigh. \
-Instruct patient to always keep incision covered unless showering, then may cover incision with plastic wrap \
-or Tegaderm (or like product). Clinician to assess/evaluate wound(s) and dressings at each and PRN for \
-signs/symptoms of infection."""
+
 
 elif physician.lower() == "manuel":
     tempHigh = "101.5"
@@ -741,18 +664,7 @@ elif physician.lower() == "manuel":
     # freqSatManuel_1w1_4w1_3w1_2w1
     # freqSunManuel_4w1_3w1_2w1
     # phManuel_737_202_2500
-    if 'aquacel' in woundDesc.lower() or 'mepilex' in woundDesc.lower():
-        woundCare = f"""Aquacel or Mepilex - leave in place for 7 days then remove and replace with second Aquacel or \
-Mepilex.  Report any drainage to provider. Post op day 7 is {POD7DD}. ____"""
-    elif 'prevena' in woundDesc.lower():
-        woundCare = f"""Prevena wound vac - leave for 7 days and replace with Aquacel or Mepilex. Report any drainage \
-to provider. Post op day 7 is {POD7DD}. ____"""
-    elif 'pico' in woundDesc.lower():
-        woundCare = f"""PICO wound vac - cut tubing/disconnect box at 7 days and cover stump with a tegaderm UNLESS \
-saturated with drainage, water or sweat then change to Aquacel or Mepilex. Leave PICO dressing in place until surgeon \
-follow up appt. Report any drainage to provider. Post op day 7 is {POD7DD}. ____"""
-    else:
-        woundCare = """Add custom wound care here ____ """
+
 
 elif physician.lower() == "michel":
     tempHigh = "100.5"
@@ -760,8 +672,7 @@ elif physician.lower() == "michel":
     TEDhose = "TED hose as needed for pain and edema control (call into office for approval). May take off at night."
     # freqMichel_1w1_3w1_2w3
     # phMichel_512_454_4561
-    woundCare = """Keep dressing in place until return to MD. If dressing becomes compromised, saturated, or \
-dislodged, call MD, do not remove. ____"""
+
 
 elif physician.lower() == "millican":
     tempHigh = "101.5"
@@ -770,13 +681,7 @@ elif physician.lower() == "millican":
     # freqSatMillican_1w1_3w1_2w1
     # freqSunMillican_3w2
     # phMillican_210_692_7400
-    woundCare = """• Report any drainage to surgeon. If wound is questionable in any way, \
-take a picture of wound and send to surgeon then upload to chart.
-• If wound has saturated original Aquacel or medline equivalent dressing
-dressing prior to first change, contact surgeon
-• If blisters form around wound, notify surgeon. Surgeon will change
-dressing type.
-• Sutures or staples will be removed by provider in office. ____"""
+
 
 elif physician.lower() == 'moghimi':
     self.tempHigh = "100.5"
@@ -786,21 +691,12 @@ elif physician.lower() == 'moghimi':
     # MA = "Payton"
     # freqSatMoghimi_1w1_3w1_2w4
     # freqSunMoghimi_3w1_2w4
-    self.woundCare = """• Bandage (gauze/tape/tegaderm if present) may be removed the second day following \
-surgery. Dermabond Prineo dressing to remain on until surgeon follow-up. Surgeon to remove staples at 2 week \
-post op.
-• May cover incision as needed with gauze and tape if bleeding still occurs or for comfort measure. For heavy \
-bleeding, please notify surgeon."""
+
 
 elif physician.lower() == "moore":
     self.physicianFullName = 'Dustin Moore'
     # phMoore_512_894_2294
-    self.woundCare = """Dressing Change: \
-      1) Remove Aquacel dressing* Post op Day #7 \
-      2) Clean area with alcohol followed by chloroprep and allow to dry \
-      3) Place new Aquacel over incision (patient should have been given one from hospital) \
-      *If wound vac is in place (often for revisions or high risk) remove POD #7 and place Aquacel dressing as \
-described above unless otherwise specified."""
+
 
 elif physician.lower() == 'nwelue':
     tempHigh = "101.5"
@@ -808,16 +704,6 @@ elif physician.lower() == 'nwelue':
     TEDhose = "No TED hose. ____"
     # phNwelue_210_804_5400	
 
-    woundCare = """Nonremovable dressing in place to operative joint, unable to visualize incision. \
-Dressing must be replaced by Clinician on Post Op Day 7. Leave Adaptic / Mesh in place and change \
-outer dressing only. Report any drainage to surgeon. If incision looks questionable in any way, \
-take picture, send to Dr. Nwelue, and upload to patient chart. If blisters form around dressing, \
-notify surgeon so type of dressing may be changed. Any sutures or staples will be removed by \
-surgeon in office. Report to physician increased temperature greater than 101.5, chills, \
-increase in drainage, foul odor, redness, unrelieved pain rated above 6/ 10. Clinician to instruct \
-active care participants on symptoms of wound infection to report to physician, to include increased \
-temperature greater than 101.5, increase in drainage, foul odor, redness, unrelieved pain above 6 on \
-0-10 scale, and any other significant changes."""
 
 else:
     woundCare = 'Monitor wound(s) for abnormalities. ____ '
@@ -1175,28 +1061,18 @@ def clearLink():
     input("<Enter> when all sections cleared and ready to autofill page")
 
 
-print("PTA: " + pta + " CM: " + CM + '\n')
-print(forcuraBlurb + '\n')
-print("Wound care on orders: " + woundCare + woundCareCustom + '\n')
+
 
 
 if __name__ == "__main__":
+    print("PTA: " + pta + " CM: " + CM + '\n')
+    print(forcuraBlurb + '\n')
+    print("Wound care on orders: " + woundCare + woundCareCustom + '\n')
 
     # these 3 lines can be removed once all sections go through utils
     sys.path.append("C:\\users\\oto23\\AppData\\Roaming\\Python\\Python39\\site-packages")
     from selenium import webdriver
     from selenium.webdriver.common.keys import Keys
-
-
-    # open browser
-    # driver = webdriver.Chrome("C:\\Program Files\Google\Chrome\Application\chromedriver")
-    # driver.get("https://kinnser.net/login.cfm")
-    # userElem = driver.find_element_by_id("username")
-    # userElem.send_keys(username)
-    # userElem.send_keys(Keys.TAB) # use without password
-    # passElem = driver.find_element_by_id("password")
-    # passElem.send_keys("")
-    # passElem.submit()
 
     # initiate webdriver
     driver = utils.webdriver_init()
@@ -1205,26 +1081,19 @@ if __name__ == "__main__":
     utils.open_browswer(driver, username)
 
 
-
-
     ##### Section 3 of 3 - Autofill forms and pages #####
 
 
     #### SOC ROC report
     utils.comm_note(driver, patientName, text=SOCrocReport)
-    # page = "SOC ROC Report"
-    # input(f'{patientName} AUTOFILL {page}')
-    # try:
-    #     driver.find_element_by_id("CallSummary").send_keys(SOCrocReport)
-
-    # except:
-    #     PAE()
-
-
 
 
     ##### 1 Patient Tracking
-    page = "Patient Tracking"
+    # page = "Patient Tracking"
+
+    utils.patient_tracking(driver, patientName, visitStartTime, visitEndTime, evalDate, ROC, insurance, 
+                           caregiverName, caregiverRltnshp, caregiverPhone)
+    '''
     input(f'{patientName} AUTOFILL {page}')
 
     try:
@@ -1267,7 +1136,7 @@ if __name__ == "__main__":
         PAE()
 
     scroll_up_then_pause()  # pause to finish and inspect page
-
+    '''
 
     ##### 2 Administrative
     page = "Administrative"
