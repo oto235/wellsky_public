@@ -583,125 +583,83 @@ TEDhose = "TED hose _____ x 2 weeks. May take off at night."
 '''
 # preloaded physicians
 if physician.lower() == "borick":
-    tempHigh = "101"
-    physicianFullName = 'Jay Borick'
     # freqBorick_1w1_unk
     # phBorick_512_244_0766
 
 
 elif physician.lower() == "catlett":
-    tempHigh = "100"
-    physicianFullName = 'Gregory Catlett'
-    TEDhose = "No TED hose."
     # freqSatCatlett_1w1_3w1_2w4
     # freqSunCatlett_4w1_2w4
     # phCatlett_512_476_2830
 
 
 elif physician.lower() == "dodgin":
-    tempHigh = "101"
-    physicianFullName = 'David Dodgin'
-    TEDhose = "No TED hose."
     # freqSatDodgin_1w1_3w1_2w1
     # freqSunDodgin_4w1_3w1
     # phDodgin_512_476_2830
 
 
 elif physician.lower() == "gerken":
-    tempHigh = "101.5"
-    physicianFullName = 'Nicholas Gerken'
-    TEDhose = "TED hose: thigh high, 22 hours a day until DCed by MD."
     # freqSatGerken_1w1_3w1_2w1
     # freqSunGerken_3w2
     # phGerken_210_874_3359
 
 
 elif physician.lower() == "goldberg":
-    tempHigh = "100"
-    physicianFullName = 'Tyler Goldberg'
-    TEDhose = "TED hose bilaterally daily: 24 hrs/day for 4 weeks on the operative side and 2 weeks on the non-operative \
-side."
     # freqSatGoldberg_1w1_4w1_3w1_2w1
     # freqSunGoldberg_4w1_3w1_2w1
     # phGoldberg_512_856_1000
 
 
 elif physician.lower() == "gordon":
-    tempHigh = "101.5"
-    physicianFullName = 'Gregory Gordon'
-    TEDhose = "TED hose x 2 weeks. May take off at night."
     # freqSatGordon_1w1_3w1_2w1
     # freqSunGordon_3w2
     # phGordon_210_390_0008
 
 
 elif physician.lower() == "heinrich":
-    tempHigh = "100"
-    physicianFullName = 'Matt Heinrich'
-    TEDhose = "TED hose x 4 weeks. May take off at night."
     # freqSatHeinrich_1w1_4w1_3w1_2w1
     # freqSunHeinrich_4w1_3w1_2w1
     # phHeinrich_512_476_2830
 
 
 elif physician.lower() == "hurt":
-    self.physicianFullName = 'Joel Hurt'
-    self.TEDhose = "TED hose: Bilateral thigh high until follow up visit. May remove at night."
     # freqHurt 6 visits in first 14 days
     # phHurt_512_856_1000
 
 
 elif physician.lower() == "hyde":
-    tempHigh = "101.5"
-    physicianFullName = 'Carolyn Hyde'
     # phHyde_512_346_4933
 
 
 elif physician.lower() == "manuel":
-    tempHigh = "101.5"
-    physicianFullName = 'Jacob Manuel'
-    TEDhose = "TED hose x 2 weeks. May take off at night."
     # freqSatManuel_1w1_4w1_3w1_2w1
     # freqSunManuel_4w1_3w1_2w1
     # phManuel_737_202_2500
 
 
 elif physician.lower() == "michel":
-    tempHigh = "100.5"
-    physicianFullName = 'David Michel'
-    TEDhose = "TED hose as needed for pain and edema control (call into office for approval). May take off at night."
     # freqMichel_1w1_3w1_2w3
     # phMichel_512_454_4561
 
 
 elif physician.lower() == "millican":
-    tempHigh = "101.5"
-    physicianFullName = 'Geoffrey Millican'
-    TEDhose = "TED hose x 2 weeks. May take off at night."
     # freqSatMillican_1w1_3w1_2w1
     # freqSunMillican_3w2
     # phMillican_210_692_7400
 
 
 elif physician.lower() == 'moghimi':
-    self.tempHigh = "100.5"
-    self.physicianFullName = 'Michael Moghimi'
-    self.TEDhose = "No TED hose."
     # phMoghimi_512_476_2830
-    # MA = "Payton"
     # freqSatMoghimi_1w1_3w1_2w4
     # freqSunMoghimi_3w1_2w4
 
 
 elif physician.lower() == "moore":
-    self.physicianFullName = 'Dustin Moore'
     # phMoore_512_894_2294
 
 
 elif physician.lower() == 'nwelue':
-    tempHigh = "101.5"
-    physicianFullName = 'Emmanuel Nwelue'
-    TEDhose = "No TED hose. ____"
     # phNwelue_210_804_5400	
 
 
