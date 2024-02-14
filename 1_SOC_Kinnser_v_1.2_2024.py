@@ -1,16 +1,14 @@
 import sys, time, traceback
 from datetime import date, timedelta, datetime
-sys.path.append("C:\\Users\\oto23\\mu_code\\CHH_scripts")
+import hidden_vars
+sys.path.append(hidden_vars.filepath_CHH)
 import chh, utils
-# version 1.10
+
 branch =              0  # 0 = Austin      1 = San Antonio
 SOC_ROC_note =        1
 fill_out_note =       1
 print_forcura_blurb = 1
 ROC =                 0
-# TODO dialysis put in program, reasons for wrong answers on cog page,
-# TODO ROC supervisory aide visit page,
-# TODO add html search on med page for specific class of meds
 
 
 # SOC FOLDER  PT POC   DRESSING   INFECTION   DVT'S   PAIN   BM   WBAT   FALL RISK   AD
@@ -471,10 +469,12 @@ if opioid_usage == 1:
     func_impair_factors += ", opioid usage"
 
 # BIMS_score= c_rep_3_words + c_year + c_month + c_day_of_week + c_400_sock + c_400_blue + c_400_bed
+
+# Get apropriate username
 if branch == 0:
-    username = 'jasonschwarz'
+    username = private.username_austin
 elif branch == 1:
-    username = 'jasonschwarzpt@gmail.com'
+    username = private.username_san_antonio
 
 pressure_sore_risk_comment = "Low Risk"
 if norton_score < 19:
@@ -511,25 +511,6 @@ if norton_score < 10:
 
 ##### Section 1 fo 3 - variable manipulation for later uses #####
 
-'''
-# default vital sign parameters
-tempHigh = "100.5"  # this will change for pre-loaded physicians
-tempLow = 96
-pulseHigh = 100
-pulseLow = 60
-respHigh = 24
-respLow = 12
-sbpHigh = 170
-sbpLow = 100
-dbpHigh = 100
-dbpLow = 60
-o2Low = 90
-# if dm == 1: these will be used:
-fastBsHigh = 200
-fastBsLow = 60
-randBsHigh = 200
-randBsLow = 60
-'''
 
 # reformat preloaded phone numbers
 if physicianPhone.lstrip().startswith('ph'):
@@ -575,98 +556,80 @@ physs = chh.Physicians()
 tempHigh, physicianFullName, woundCare, TEDhose = physs.get_phys_details(physician, woundDesc, POD7DD)
 vitals = chh.Vitals()
 
-'''
-# TED hose default orders:
-TEDhose = "TED hose _____ x 2 weeks. May take off at night."
-'''
 
 '''
 # preloaded physicians
-if physician.lower() == "borick":
-    # freqBorick_1w1_unk
-    # phBorick_512_244_0766
+
+### borick
+# freqBorick_1w1_unk
+# phBorick_512_244_0766
 
 
-elif physician.lower() == "catlett":
-    # freqSatCatlett_1w1_3w1_2w4
-    # freqSunCatlett_4w1_2w4
-    # phCatlett_512_476_2830
+### catlett
+# freqSatCatlett_1w1_3w1_2w4
+# freqSunCatlett_4w1_2w4
+# phCatlett_512_476_2830
 
 
-elif physician.lower() == "dodgin":
-    # freqSatDodgin_1w1_3w1_2w1
-    # freqSunDodgin_4w1_3w1
-    # phDodgin_512_476_2830
+### dodgin
+# freqSatDodgin_1w1_3w1_2w1
+# freqSunDodgin_4w1_3w1
+# phDodgin_512_476_2830
 
 
-elif physician.lower() == "gerken":
-    # freqSatGerken_1w1_3w1_2w1
-    # freqSunGerken_3w2
-    # phGerken_210_874_3359
+### gerken
+# freqSatGerken_1w1_3w1_2w1
+# freqSunGerken_3w2
+# phGerken_210_874_3359
 
+### goldberg
+# freqSatGoldberg_1w1_4w1_3w1_2w1
+# freqSunGoldberg_4w1_3w1_2w1
+# phGoldberg_512_856_1000
 
-elif physician.lower() == "goldberg":
-    # freqSatGoldberg_1w1_4w1_3w1_2w1
-    # freqSunGoldberg_4w1_3w1_2w1
-    # phGoldberg_512_856_1000
+### gordon
+# freqSatGordon_1w1_3w1_2w1
+# freqSunGordon_3w2
+# phGordon_210_390_0008
 
+### heinrich
+# freqSatHeinrich_1w1_4w1_3w1_2w1
+# freqSunHeinrich_4w1_3w1_2w1
+# phHeinrich_512_476_2830
 
-elif physician.lower() == "gordon":
-    # freqSatGordon_1w1_3w1_2w1
-    # freqSunGordon_3w2
-    # phGordon_210_390_0008
+### hurt
+# freqHurt 6 visits in first 14 days
+# phHurt_512_856_1000
 
+### hyde
+# phHyde_512_346_4933
 
-elif physician.lower() == "heinrich":
-    # freqSatHeinrich_1w1_4w1_3w1_2w1
-    # freqSunHeinrich_4w1_3w1_2w1
-    # phHeinrich_512_476_2830
+### manuel
+# freqSatManuel_1w1_4w1_3w1_2w1
+# freqSunManuel_4w1_3w1_2w1
+# phManuel_737_202_2500
 
+### michel
+# freqMichel_1w1_3w1_2w3
+# phMichel_512_454_4561
 
-elif physician.lower() == "hurt":
-    # freqHurt 6 visits in first 14 days
-    # phHurt_512_856_1000
+### millican
+# freqSatMillican_1w1_3w1_2w1
+# freqSunMillican_3w2
+# phMillican_210_692_7400
 
+### moghimi
+# phMoghimi_512_476_2830
+# MA = "Payton"
+# freqSatMoghimi_1w1_3w1_2w4
+# freqSunMoghimi_3w1_2w4
 
-elif physician.lower() == "hyde":
-    # phHyde_512_346_4933
+### moore
+# phMoore_512_894_2294
 
+### nwelue
+# phNwelue_210_804_5400	
 
-elif physician.lower() == "manuel":
-    # freqSatManuel_1w1_4w1_3w1_2w1
-    # freqSunManuel_4w1_3w1_2w1
-    # phManuel_737_202_2500
-
-
-elif physician.lower() == "michel":
-    # freqMichel_1w1_3w1_2w3
-    # phMichel_512_454_4561
-
-
-elif physician.lower() == "millican":
-    # freqSatMillican_1w1_3w1_2w1
-    # freqSunMillican_3w2
-    # phMillican_210_692_7400
-
-
-elif physician.lower() == 'moghimi':
-    # phMoghimi_512_476_2830
-    # freqSatMoghimi_1w1_3w1_2w4
-    # freqSunMoghimi_3w1_2w4
-
-
-elif physician.lower() == "moore":
-    # phMoore_512_894_2294
-
-
-elif physician.lower() == 'nwelue':
-    # phNwelue_210_804_5400	
-
-
-else:
-    woundCare = 'Monitor wound(s) for abnormalities. ____ '
-    print('Following physician not loaded into program.')
-    physicianFullName = physician
 '''
 
 if numberOfWounds == 0:
@@ -919,45 +882,20 @@ Provider follow-up at 2 weeks post op.  Call surgeon if no BM after 5 days. {TED
 
 
 
-# General interventions (everyone admit gets them)
-generalInterventions = """Patient was identified with 2+ forms of ID: DOB, name, and ____ caregiver \
-confirmation. Patient agreed w/ provision of HHC. Consents signed for care.
-
-P.T. performed whole body assessment.  VS, BM’s ______ WNL; action taken: ____ \
-Edema present at and around impairment site. Signs/sx of UTI ____ not present.
-
-P.T. completed medication reconciliation and instructed patient on new and/or current medication \
-list. Patient was ___ able to verbalize actions, side effects, and correct schedule/dosages of \
-his/her meds.
-
-Instructed patient regarding home health care, infection control measures, advanced directives. \
-Advised patient to have emergency plan including evacuation and sheltering location.
-
-Instructed patient when to call home health agency versus emergency services (911).
-
-Instructed patient to monitor for signs and symptoms of infection and blood clots.
-
-Instructed patient how to manage pain with medications listed in chart and non-pharmaceutical \
-methods and to monitor signs of symptoms of adverse reactions including constipation.
-
-Instructed patient in fall risk mitigation and home safety including using prescribed assistive \
-device, getting help from caregiver when unsafe, using appropriate lighting, wearing appropriate \
-foot coverings, using non-slip mats in bathrooms, ______ removing non-secured rugs.
-
-Discussed plan of care and frequency including wound care with patient (and family/caregivers).  \
-Therapist and patient in agreement. _____
-
-"""
+# General interventions (everyone admitted gets them)
+generalInterventions = utils.general_interventions()
 
 
 
 
 # HB ortho used on "PT Eval" page
-hbOrtho = f"Patient is homebound due to recent {effect}, \
-unsteady and unsafe ambulation, very poor balance, weakness, and abnormal transfers.  \
-Patient is at high risk for falls with serious injury due to surgery and requires assistance of \
-2 wheel walker and of another person with all transfers/ambulation and when leaving the \
-home for medically necessary appointments.\n\n"
+# hbOrtho = f"Patient is homebound due to recent {effect}, \
+# unsteady and unsafe ambulation, very poor balance, weakness, and abnormal transfers.  \
+# Patient is at high risk for falls with serious injury due to surgery and requires assistance of \
+# 2 wheel walker and of another person with all transfers/ambulation and when leaving the \
+# home for medically necessary appointments.\n\n"
+
+hbOrtho = utils.hb_ortho(effect)
 
 
 
@@ -998,6 +936,7 @@ transmission?"""
 
 
 # define functions
+# these can be removed once all is migrated to utils.py
 def PAE():
     print(f"***** {page} AUTOFILL ERROR *****")
     errorFile = open(f'{patientName}_{page}_error_file', 'w')
@@ -1021,19 +960,18 @@ def clearLink():
 
 
 
-
 if __name__ == "__main__":
     print("PTA: " + pta + " CM: " + CM + '\n')
     print(forcuraBlurb + '\n')
     print("Wound care on orders: " + woundCare + woundCareCustom + '\n')
 
-    # these 3 lines can be removed once all sections go through utils
-    sys.path.append("C:\\users\\oto23\\AppData\\Roaming\\Python\\Python39\\site-packages")
+    # the next 3 lines can be removed once all sections go through utils.py
+    sys.path.append(hidden_vars.filepath_selenium)
     from selenium import webdriver
     from selenium.webdriver.common.keys import Keys
 
     # initiate webdriver
-    driver = utils.webdriver_init()
+    driver = utils.webdriver_init(hidden_vars.filepath_webdriver)
 
     # open browswer
     utils.open_browswer(driver, username)

@@ -18,7 +18,7 @@ class Vitals:
     rand_bs_low = 60
 
 
-#### example physicians listed below
+#### EXAMPLE physicians listed below
 class Physicians:
     def __init__(self):
         self.tempHigh = Vitals.temp_high
