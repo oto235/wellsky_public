@@ -564,18 +564,15 @@ vitals = chh.Vitals()
 # freqBorick_1w1_unk
 # phBorick_512_244_0766
 
-
 ### catlett
 # freqSatCatlett_1w1_3w1_2w4
 # freqSunCatlett_4w1_2w4
 # phCatlett_512_476_2830
 
-
 ### dodgin
 # freqSatDodgin_1w1_3w1_2w1
 # freqSunDodgin_4w1_3w1
 # phDodgin_512_476_2830
-
 
 ### gerken
 # freqSatGerken_1w1_3w1_2w1
@@ -717,51 +714,55 @@ if catheterBlurb != "":
     catheterBlurb = f"\n{catheterBlurb}\n"
 
 # SOC/ROC report used in 'Communication' note
-SOCrocReport = f"""SOC/ROC REPORT
+# SOCrocReport = f"""SOC/ROC REPORT
 
-PT Admitted {age} yr old {gender} with primary Dx: {approach}{side}{joint}{effect}
+# PT Admitted {age} yr old {gender} with primary Dx: {approach}{side}{joint}{effect}
 
-Relevant medical history: {relevantMedHx}
+# Relevant medical history: {relevantMedHx}
 
-Wound/Incision: {woundDesc}
+# Wound/Incision: {woundDesc}
 
-PCP/Following Doctors and phone numbers:
-Following: Dr {physicianFullName} at {physicianPhone}
-{physicianOthers}
+# PCP/Following Doctors and phone numbers:
+# Following: Dr {physicianFullName} at {physicianPhone}
+# {physicianOthers}
 
-Telehealth Candidate: no
+# Telehealth Candidate: no
 
-Additional Risk Information or special instructions: none
+# Additional Risk Information or special instructions: none
 
-Last MD F2F visit: {F2Fdate}
+# Last MD F2F visit: {F2Fdate}
 
-Ortho Protocol: {orthoProtocol} ____
+# Ortho Protocol: {orthoProtocol} ____
 
-Which MD was called to approve POC: {POCapproval}
+# Which MD was called to approve POC: {POCapproval}
 
-Name of who POC was reported to? (RN/MA/PA): {POCapproval}
+# Name of who POC was reported to? (RN/MA/PA): {POCapproval}
 
-Was POC approved? {POCapproval}
+# Was POC approved? {POCapproval}
 
-Name of facility patient discharged from: {dcedFrom}
+# Name of facility patient discharged from: {dcedFrom}
 
-Frequency and Duration:
+# Frequency and Duration:
 
-SN:  {nurseFreq}
-PT:  {ptFreq}
-OT:  {otFreq}
-ST:  {stFreq}
-MSW: {MSWfreq}
-HHA: {HHAfreq}
+# SN:  {nurseFreq}
+# PT:  {ptFreq}
+# OT:  {otFreq}
+# ST:  {stFreq}
+# MSW: {MSWfreq}
+# HHA: {HHAfreq}
 
-Wound care: {woundCare} {woundCareCustom}
+# Wound care: {woundCare} {woundCareCustom}
 
-PT interventions, reason for home care, plan for next visit : ____ {PTPOCfocus}
+# PT interventions, reason for home care, plan for next visit : ____ {PTPOCfocus}
 
-Coordinated care with: reviewed calendar and plan of care with patient. Contacted scheduler, case manager, and next clinician.
-"""
+# Coordinated care with: reviewed calendar and plan of care with patient. Contacted scheduler, case manager, and next clinician.
+# """
 
-
+SOCrocReport = utils.SOC_ROC_report(age, gender, approach, side, joint, effect, relevantMedHx, woundDesc,
+                   physicianFullName, physicianPhone, physicianOthers, F2Fdate,
+                   orthoProtocol, POCapproval, dcedFrom, nurseFreq, ptFreq,
+                   otFreq, stFreq, MSWfreq, HHAfreq, woundCare, woundCareCustom, 
+                   PTPOCfocus)
 
 
 # joint specific clause for main orders
@@ -785,104 +786,105 @@ else:
 
 
 # main orders to go on POC:
-mainOrders = f"""•
-•
-Physician orders received. Admit patient to home health care for diagnosis of {medDx}.
-•      Skilled Nurse for assessment, education on disease processes, medications, and safety.
-•      PT OT ST -  Therapy to evaluate and Treat/ perform home safety evaluation - Develop \
-discipline specific Plan of Care.
+# mainOrders = f"""•
+# •
+# Physician orders received. Admit patient to home health care for diagnosis of {medDx}.
+# •      Skilled Nurse for assessment, education on disease processes, medications, and safety.
+# •      PT OT ST -  Therapy to evaluate and Treat/ perform home safety evaluation - Develop \
+# discipline specific Plan of Care.
 
-Clinician to perform complete system assessment.  Assess cardio-pulmonary, GU/GI, nutrition, \
-pain management, musculoskeletal, circulatory, neurological, hydration, skin integrity, \
-assess medication compliance and effectiveness, clinician can pre-fill medication box as \
-needed if patient/caregiver unable or refuses to do. Clinician to assess response to treatment \
-regimen, s/s of adverse effects of disease process, need for adjustment in response to \
-medication regimen, and need for adjustment in POC.  Report abnormal finding to health care \
-provider.
-Clinician to inform the patient/caregivers on infection control including COVID-19 and \
-measures to prevent the spread of the disease.
+# Clinician to perform complete system assessment.  Assess cardio-pulmonary, GU/GI, nutrition, \
+# pain management, musculoskeletal, circulatory, neurological, hydration, skin integrity, \
+# assess medication compliance and effectiveness, clinician can pre-fill medication box as \
+# needed if patient/caregiver unable or refuses to do. Clinician to assess response to treatment \
+# regimen, s/s of adverse effects of disease process, need for adjustment in response to \
+# medication regimen, and need for adjustment in POC.  Report abnormal finding to health care \
+# provider.
+# Clinician to inform the patient/caregivers on infection control including COVID-19 and \
+# measures to prevent the spread of the disease.
 
-HHA will provide PPE to be used by patient/caregiver during the HHA visit upon request.
-Clinicians will utilize infection control.
-Clinician to provide education for s/s of COVID-19 and how to protect themselves and family \
-members.  Avoid crowds or areas with a concentration of high traffic. Mild respiratory \
-symptom may want to get tested, or self-quarantine 10-14 days, stay home and avoid sick \
-individuals, wash hands, clean all high touch surfaces. Moderate to severe symptoms including \
-shortness of breath and fevers, seek medical attention or go the hospital or ER.
+# HHA will provide PPE to be used by patient/caregiver during the HHA visit upon request.
+# Clinicians will utilize infection control.
+# Clinician to provide education for s/s of COVID-19 and how to protect themselves and family \
+# members.  Avoid crowds or areas with a concentration of high traffic. Mild respiratory \
+# symptom may want to get tested, or self-quarantine 10-14 days, stay home and avoid sick \
+# individuals, wash hands, clean all high touch surfaces. Moderate to severe symptoms including \
+# shortness of breath and fevers, seek medical attention or go the hospital or ER.
 
- {otherdisciplines} ____
+#  {otherdisciplines} ____
 
-•Home Health Agency to HOLD patient's services on admitted to inpatient facility and resume \
-care upon discharge. Clinician frequency 1W1 resume home health care.
-Agency to discharge patient while in an inpatient facility at end of certification and may \
-readmit post d/c for inpatient facility, assess health care needs 1w1.
+# •Home Health Agency to HOLD patient's services on admitted to inpatient facility and resume \
+# care upon discharge. Clinician frequency 1W1 resume home health care.
+# Agency to discharge patient while in an inpatient facility at end of certification and may \
+# readmit post d/c for inpatient facility, assess health care needs 1w1.
 
-•Clinicians to assess oxygen saturation via Pulse Oximetry PRN for symptoms of SOB. Report \
-Pulse Oximetry reading < 90% to MD.
+# •Clinicians to assess oxygen saturation via Pulse Oximetry PRN for symptoms of SOB. Report \
+# Pulse Oximetry reading < 90% to MD.
 
-• Agency may accept orders from on-call physician and any other consulting physician, \
-ancillary PA, and NP identified as providing care for patient.
+# • Agency may accept orders from on-call physician and any other consulting physician, \
+# ancillary PA, and NP identified as providing care for patient.
 
-Generic equivalent care supplies may be substituted for all current and future orders.
+# Generic equivalent care supplies may be substituted for all current and future orders.
 
-•Home Health Care may recertify patient for consecutive 60-day episode bases on patient \
-medical necessity extending from current certification to include all new, changed orders, \
-diagnosis, exacerbations of disease process, medication, and knowledge deficit of patient \
-and-or caregiver and-or lack of willing, able caregiver to provide essential care.
+# •Home Health Care may recertify patient for consecutive 60-day episode bases on patient \
+# medical necessity extending from current certification to include all new, changed orders, \
+# diagnosis, exacerbations of disease process, medication, and knowledge deficit of patient \
+# and-or caregiver and-or lack of willing, able caregiver to provide essential care.
 
-DISCHARGE: Clinician to discharge patient from home health services when all goals are met, \
-is no longer homebound, patient or MD requests discharge, patient's insurance changes (agency \
-to re-admit under new policy if patient in agreement), or if patient moves out of service area.
+# DISCHARGE: Clinician to discharge patient from home health services when all goals are met, \
+# is no longer homebound, patient or MD requests discharge, patient's insurance changes (agency \
+# to re-admit under new policy if patient in agreement), or if patient moves out of service area.
 
-MEDICATIONS: SN or therapist to teach on new and high-risk medications, action and side \
-effects and when to notify Capitol Home Health / MD re: ineffective or adverse reactions to \
-medications.
+# MEDICATIONS: SN or therapist to teach on new and high-risk medications, action and side \
+# effects and when to notify Capitol Home Health / MD re: ineffective or adverse reactions to \
+# medications.
 
-Home health clinician to develop personalized emergency plan with patient.
+# Home health clinician to develop personalized emergency plan with patient.
 
-PAIN:
-Home health clinician to assess and monitor patient's pain level and related vital signs, \
-recommend pain medication(s) as ordered only, educate and-or implement non-pharmacological \
-measures to reduce pain (e.g. ice, heat, massage, relaxation, meditation) unless \
-contraindicated (eg. no heat with active cancer or RA).  Notify physician due to unrelieved \
-pain above 6 on 0-10 pain scale.
+# PAIN:
+# Home health clinician to assess and monitor patient's pain level and related vital signs, \
+# recommend pain medication(s) as ordered only, educate and-or implement non-pharmacological \
+# measures to reduce pain (e.g. ice, heat, massage, relaxation, meditation) unless \
+# contraindicated (eg. no heat with active cancer or RA).  Notify physician due to unrelieved \
+# pain above 6 on 0-10 pain scale.
 
-GENERAL WOUND/INCISION CARE:
-If blisters form around wound, notify surgeon. Sutures or staples will be removed by provider \
-in office.  Report any drainage to surgeon. If wound is questionable in any way, take a \
-picture of wound and send to surgeon then upload to chart.
+# GENERAL WOUND/INCISION CARE:
+# If blisters form around wound, notify surgeon. Sutures or staples will be removed by provider \
+# in office.  Report any drainage to surgeon. If wound is questionable in any way, take a \
+# picture of wound and send to surgeon then upload to chart.
 
-Home health clinician to instruct the patient on signs and symptoms of wound infection to \
-report to physician including increased temperature above {tempHigh}, chills, \
-increase in drainage, foul odor, redness, unrelieved pain above 6 on 0-10 scale, and any \
-other significant changes.
+# Home health clinician to instruct the patient on signs and symptoms of wound infection to \
+# report to physician including increased temperature above {tempHigh}, chills, \
+# increase in drainage, foul odor, redness, unrelieved pain above 6 on 0-10 scale, and any \
+# other significant changes.
 
-Home health clinician to evaluate wound(s) at each dressing change and PRN for signs and symptoms \
-of infection. Report to physician increased temperature above {tempHigh}, \
-chills, increase in drainage, foul odor, redness, unrelieved pain above 6 on 0-10 scale, and \
-any other significant changes.
+# Home health clinician to evaluate wound(s) at each dressing change and PRN for signs and symptoms \
+# of infection. Report to physician increased temperature above {tempHigh}, \
+# chills, increase in drainage, foul odor, redness, unrelieved pain above 6 on 0-10 scale, and \
+# any other significant changes.
 
-SPECIFIC WOUND/INCISION CARE:
-{woundCare} {woundCareCustom}
+# SPECIFIC WOUND/INCISION CARE:
+# {woundCare} {woundCareCustom}
 
-PT TREATMENT:
-Physical therapy treatment to focus on rehab of {side}{joint}{effect} including the following interventions:
+# PT TREATMENT:
+# Physical therapy treatment to focus on rehab of {side}{joint}{effect} including the following interventions:
 
-Physical therapist to teach and perform on patient: {wbStatus}, ____, transfers, gait, balance, \
-bed mobility, stairs and steps, home safety, assistive devices including walkers and canes as \
-appropriate, therapeutic exercises to all affected body regions, establish and upgrade HEP, \
-passive, active, ____ and active assisted range of motion, manual therapy, muscle re-education, and \
-non-pharmaceutical modalities for pain control.
+# Physical therapist to teach and perform on patient: {wbStatus}, ____, transfers, gait, balance, \
+# bed mobility, stairs and steps, home safety, assistive devices including walkers and canes as \
+# appropriate, therapeutic exercises to all affected body regions, establish and upgrade HEP, \
+# passive, active, ____ and active assisted range of motion, manual therapy, muscle re-education, and \
+# non-pharmaceutical modalities for pain control.
 
-{jointOrders}
-Utilize standard agency vital signs, notify provider for temperature >{tempHigh}. ___
-Provider follow-up at 2 weeks post op.  Call surgeon if no BM after 5 days. {TEDhose}
-{painPumpBlurb} {painPumpOrders}"""
-
-
+# {jointOrders}
+# Utilize standard agency vital signs, notify provider for temperature >{tempHigh}. ___
+# Provider follow-up at 2 weeks post op.  Call surgeon if no BM after 5 days. {TEDhose}
+# {painPumpBlurb} {painPumpOrders}"""
 
 
-# General interventions (everyone admitted gets them)
+mainOrders = utlis.main_orders(medDx, otherdisciplines, tempHigh, woundCare, woundCareCustom, side, joint, 
+                               effect, wbStatus, jointOrders, TEDhose, painPumpBlurb, painPumpOrders)
+
+# General interventions (everyone admitted gets them, no input needed)
 generalInterventions = utils.general_interventions()
 
 
@@ -901,36 +903,36 @@ hbOrtho = utils.hb_ortho(effect)
 
 
 # Covid screen used on "PT Eval" page
-covidScreen = f"""COVID 19 Screening Requirements:
-** TIME OF SCREENING: _{myTempTime}_
+# covidScreen = f"""COVID 19 Screening Requirements:
+# ** TIME OF SCREENING: _{myTempTime}_
 
-SCREENING OF CLINICIAN:
-Clinician Temperature prior to entry in the home/facility: _{myTemp}_
-    N  Fever or signs/symptoms of a respiratory infection such as cough, shortness of breath, \
-sore throat, chills, repeated shaking with chills, muscle pain, headache, or a new onset of \
-loss sense of taste or smell?
-    N  Has clinician had contact in the last 14 days with someone who has a confirmed diagnosis \
-of COVID-19, is under investigation for COVID-19 or is ill with the symptoms above?
-    N  Traveled within the previous 14 days to an area with sustained community transmission?
+# SCREENING OF CLINICIAN:
+# Clinician Temperature prior to entry in the home/facility: _{myTemp}_
+#     N  Fever or signs/symptoms of a respiratory infection such as cough, shortness of breath, \
+# sore throat, chills, repeated shaking with chills, muscle pain, headache, or a new onset of \
+# loss sense of taste or smell?
+#     N  Has clinician had contact in the last 14 days with someone who has a confirmed diagnosis \
+# of COVID-19, is under investigation for COVID-19 or is ill with the symptoms above?
+#     N  Traveled within the previous 14 days to an area with sustained community transmission?
 
-SCREENING OF CLIENT AND FAMILIES PRIOR TO HOME VISIT:
-Agency staff must communicate with the client before a scheduled visit, \
-either by telephone, text message, or video conference, and conduct the \
-same screen listed above and document screening:
-Patient Temperature _{ptTemp}_   Family temperature: _{fmTemp}_\
-Caregiver temperature: _{cgTemp}_
+# SCREENING OF CLIENT AND FAMILIES PRIOR TO HOME VISIT:
+# Agency staff must communicate with the client before a scheduled visit, \
+# either by telephone, text message, or video conference, and conduct the \
+# same screen listed above and document screening:
+# Patient Temperature _{ptTemp}_   Family temperature: _{fmTemp}_\
+# Caregiver temperature: _{cgTemp}_
 
-    {CV19ss} Fever or signs/symptoms of a respiratory infection such as cough, shortness \
-of breath, sore throat, chills, repeated shaking with chills, muscle pain, headache, or a new \
-onset of loss sense of taste or smell?
-    {CV19contact} Has patient/anyone in the home had contact in the last 14 days with \
-someone who has a confirmed diagnosis of COVID-19, is under investigation for COVID-19 or is \
-ill with symptoms described above?
-    {CV19travel} Traveled within the previous 14 days to an area with sustained community \
-transmission?"""
+#     {CV19ss} Fever or signs/symptoms of a respiratory infection such as cough, shortness \
+# of breath, sore throat, chills, repeated shaking with chills, muscle pain, headache, or a new \
+# onset of loss sense of taste or smell?
+#     {CV19contact} Has patient/anyone in the home had contact in the last 14 days with \
+# someone who has a confirmed diagnosis of COVID-19, is under investigation for COVID-19 or is \
+# ill with symptoms described above?
+#     {CV19travel} Traveled within the previous 14 days to an area with sustained community \
+# transmission?"""
 
 
-
+covidScreen = utils.covid_screen(myTempTime, myTemp, ptTemp, CV19ss, CV19contact, CV19travel)
 
 ##### Section 2 of 3 - define functions, initiate webdriver, open browser #####
 
