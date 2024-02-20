@@ -21,7 +21,7 @@ myTemp =            "
 myTempTime =        "
 visitStartTime =    "
 visitEndTime =      "
-evalDate =          "02-04-2024" "    # MM-DD-YYYY
+evalDate =          "02-18-2024" "    # MM-DD-YYYY
 
 patientName =       "
 MR_not_used =       "
@@ -472,9 +472,9 @@ if opioid_usage == 1:
 
 # Get apropriate username
 if branch == 0:
-    username = private.username_austin
+    username = hidden_vars.username_austin
 elif branch == 1:
-    username = private.username_san_antonio
+    username = hidden_vars.username_san_antonio
 
 pressure_sore_risk_comment = "Low Risk"
 if norton_score < 19:
@@ -554,7 +554,7 @@ if 'aqaucel' in woundDesc.lower():
 
 physs = chh.Physicians()
 tempHigh, physicianFullName, woundCare, TEDhose = physs.get_phys_details(physician, woundDesc, POD7DD)
-vitals = chh.Vitals()
+chh_vitals = chh.Vitals()
 
 
 '''
@@ -713,55 +713,11 @@ if painPumpBlurb != "":
 if catheterBlurb != "":
     catheterBlurb = f"\n{catheterBlurb}\n"
 
-# SOC/ROC report used in 'Communication' note
-# SOCrocReport = f"""SOC/ROC REPORT
-
-# PT Admitted {age} yr old {gender} with primary Dx: {approach}{side}{joint}{effect}
-
-# Relevant medical history: {relevantMedHx}
-
-# Wound/Incision: {woundDesc}
-
-# PCP/Following Doctors and phone numbers:
-# Following: Dr {physicianFullName} at {physicianPhone}
-# {physicianOthers}
-
-# Telehealth Candidate: no
-
-# Additional Risk Information or special instructions: none
-
-# Last MD F2F visit: {F2Fdate}
-
-# Ortho Protocol: {orthoProtocol} ____
-
-# Which MD was called to approve POC: {POCapproval}
-
-# Name of who POC was reported to? (RN/MA/PA): {POCapproval}
-
-# Was POC approved? {POCapproval}
-
-# Name of facility patient discharged from: {dcedFrom}
-
-# Frequency and Duration:
-
-# SN:  {nurseFreq}
-# PT:  {ptFreq}
-# OT:  {otFreq}
-# ST:  {stFreq}
-# MSW: {MSWfreq}
-# HHA: {HHAfreq}
-
-# Wound care: {woundCare} {woundCareCustom}
-
-# PT interventions, reason for home care, plan for next visit : ____ {PTPOCfocus}
-
-# Coordinated care with: reviewed calendar and plan of care with patient. Contacted scheduler, case manager, and next clinician.
-# """
-
+# for SOC ROC comm note
 SOCrocReport = utils.SOC_ROC_report(age, gender, approach, side, joint, effect, relevantMedHx, woundDesc,
                    physicianFullName, physicianPhone, physicianOthers, F2Fdate,
                    orthoProtocol, POCapproval, dcedFrom, nurseFreq, ptFreq,
-                   otFreq, stFreq, MSWfreq, HHAfreq, woundCare, woundCareCustom, 
+                   otFreq, stFreq, MSWfreq, HHAfreq, woundCare, woundCareCustom,
                    PTPOCfocus)
 
 
@@ -784,154 +740,17 @@ else:
     jointOrders = '____no joint orders____'
 
 
-
-# main orders to go on POC:
-# mainOrders = f"""•
-# •
-# Physician orders received. Admit patient to home health care for diagnosis of {medDx}.
-# •      Skilled Nurse for assessment, education on disease processes, medications, and safety.
-# •      PT OT ST -  Therapy to evaluate and Treat/ perform home safety evaluation - Develop \
-# discipline specific Plan of Care.
-
-# Clinician to perform complete system assessment.  Assess cardio-pulmonary, GU/GI, nutrition, \
-# pain management, musculoskeletal, circulatory, neurological, hydration, skin integrity, \
-# assess medication compliance and effectiveness, clinician can pre-fill medication box as \
-# needed if patient/caregiver unable or refuses to do. Clinician to assess response to treatment \
-# regimen, s/s of adverse effects of disease process, need for adjustment in response to \
-# medication regimen, and need for adjustment in POC.  Report abnormal finding to health care \
-# provider.
-# Clinician to inform the patient/caregivers on infection control including COVID-19 and \
-# measures to prevent the spread of the disease.
-
-# HHA will provide PPE to be used by patient/caregiver during the HHA visit upon request.
-# Clinicians will utilize infection control.
-# Clinician to provide education for s/s of COVID-19 and how to protect themselves and family \
-# members.  Avoid crowds or areas with a concentration of high traffic. Mild respiratory \
-# symptom may want to get tested, or self-quarantine 10-14 days, stay home and avoid sick \
-# individuals, wash hands, clean all high touch surfaces. Moderate to severe symptoms including \
-# shortness of breath and fevers, seek medical attention or go the hospital or ER.
-
-#  {otherdisciplines} ____
-
-# •Home Health Agency to HOLD patient's services on admitted to inpatient facility and resume \
-# care upon discharge. Clinician frequency 1W1 resume home health care.
-# Agency to discharge patient while in an inpatient facility at end of certification and may \
-# readmit post d/c for inpatient facility, assess health care needs 1w1.
-
-# •Clinicians to assess oxygen saturation via Pulse Oximetry PRN for symptoms of SOB. Report \
-# Pulse Oximetry reading < 90% to MD.
-
-# • Agency may accept orders from on-call physician and any other consulting physician, \
-# ancillary PA, and NP identified as providing care for patient.
-
-# Generic equivalent care supplies may be substituted for all current and future orders.
-
-# •Home Health Care may recertify patient for consecutive 60-day episode bases on patient \
-# medical necessity extending from current certification to include all new, changed orders, \
-# diagnosis, exacerbations of disease process, medication, and knowledge deficit of patient \
-# and-or caregiver and-or lack of willing, able caregiver to provide essential care.
-
-# DISCHARGE: Clinician to discharge patient from home health services when all goals are met, \
-# is no longer homebound, patient or MD requests discharge, patient's insurance changes (agency \
-# to re-admit under new policy if patient in agreement), or if patient moves out of service area.
-
-# MEDICATIONS: SN or therapist to teach on new and high-risk medications, action and side \
-# effects and when to notify Capitol Home Health / MD re: ineffective or adverse reactions to \
-# medications.
-
-# Home health clinician to develop personalized emergency plan with patient.
-
-# PAIN:
-# Home health clinician to assess and monitor patient's pain level and related vital signs, \
-# recommend pain medication(s) as ordered only, educate and-or implement non-pharmacological \
-# measures to reduce pain (e.g. ice, heat, massage, relaxation, meditation) unless \
-# contraindicated (eg. no heat with active cancer or RA).  Notify physician due to unrelieved \
-# pain above 6 on 0-10 pain scale.
-
-# GENERAL WOUND/INCISION CARE:
-# If blisters form around wound, notify surgeon. Sutures or staples will be removed by provider \
-# in office.  Report any drainage to surgeon. If wound is questionable in any way, take a \
-# picture of wound and send to surgeon then upload to chart.
-
-# Home health clinician to instruct the patient on signs and symptoms of wound infection to \
-# report to physician including increased temperature above {tempHigh}, chills, \
-# increase in drainage, foul odor, redness, unrelieved pain above 6 on 0-10 scale, and any \
-# other significant changes.
-
-# Home health clinician to evaluate wound(s) at each dressing change and PRN for signs and symptoms \
-# of infection. Report to physician increased temperature above {tempHigh}, \
-# chills, increase in drainage, foul odor, redness, unrelieved pain above 6 on 0-10 scale, and \
-# any other significant changes.
-
-# SPECIFIC WOUND/INCISION CARE:
-# {woundCare} {woundCareCustom}
-
-# PT TREATMENT:
-# Physical therapy treatment to focus on rehab of {side}{joint}{effect} including the following interventions:
-
-# Physical therapist to teach and perform on patient: {wbStatus}, ____, transfers, gait, balance, \
-# bed mobility, stairs and steps, home safety, assistive devices including walkers and canes as \
-# appropriate, therapeutic exercises to all affected body regions, establish and upgrade HEP, \
-# passive, active, ____ and active assisted range of motion, manual therapy, muscle re-education, and \
-# non-pharmaceutical modalities for pain control.
-
-# {jointOrders}
-# Utilize standard agency vital signs, notify provider for temperature >{tempHigh}. ___
-# Provider follow-up at 2 weeks post op.  Call surgeon if no BM after 5 days. {TEDhose}
-# {painPumpBlurb} {painPumpOrders}"""
-
-
-mainOrders = utlis.main_orders(medDx, otherdisciplines, tempHigh, woundCare, woundCareCustom, side, joint, 
+# main orders
+mainOrders = utils.main_orders(medDx, otherdisciplines, tempHigh, woundCare, woundCareCustom, side, joint,
                                effect, wbStatus, jointOrders, TEDhose, painPumpBlurb, painPumpOrders)
 
 # General interventions (everyone admitted gets them, no input needed)
 generalInterventions = utils.general_interventions()
 
-
-
-
-# HB ortho used on "PT Eval" page
-# hbOrtho = f"Patient is homebound due to recent {effect}, \
-# unsteady and unsafe ambulation, very poor balance, weakness, and abnormal transfers.  \
-# Patient is at high risk for falls with serious injury due to surgery and requires assistance of \
-# 2 wheel walker and of another person with all transfers/ambulation and when leaving the \
-# home for medically necessary appointments.\n\n"
-
+# home bound status for ortho patients
 hbOrtho = utils.hb_ortho(effect)
 
-
-
-
-# Covid screen used on "PT Eval" page
-# covidScreen = f"""COVID 19 Screening Requirements:
-# ** TIME OF SCREENING: _{myTempTime}_
-
-# SCREENING OF CLINICIAN:
-# Clinician Temperature prior to entry in the home/facility: _{myTemp}_
-#     N  Fever or signs/symptoms of a respiratory infection such as cough, shortness of breath, \
-# sore throat, chills, repeated shaking with chills, muscle pain, headache, or a new onset of \
-# loss sense of taste or smell?
-#     N  Has clinician had contact in the last 14 days with someone who has a confirmed diagnosis \
-# of COVID-19, is under investigation for COVID-19 or is ill with the symptoms above?
-#     N  Traveled within the previous 14 days to an area with sustained community transmission?
-
-# SCREENING OF CLIENT AND FAMILIES PRIOR TO HOME VISIT:
-# Agency staff must communicate with the client before a scheduled visit, \
-# either by telephone, text message, or video conference, and conduct the \
-# same screen listed above and document screening:
-# Patient Temperature _{ptTemp}_   Family temperature: _{fmTemp}_\
-# Caregiver temperature: _{cgTemp}_
-
-#     {CV19ss} Fever or signs/symptoms of a respiratory infection such as cough, shortness \
-# of breath, sore throat, chills, repeated shaking with chills, muscle pain, headache, or a new \
-# onset of loss sense of taste or smell?
-#     {CV19contact} Has patient/anyone in the home had contact in the last 14 days with \
-# someone who has a confirmed diagnosis of COVID-19, is under investigation for COVID-19 or is \
-# ill with symptoms described above?
-#     {CV19travel} Traveled within the previous 14 days to an area with sustained community \
-# transmission?"""
-
-
+# covid screen blurb
 covidScreen = utils.covid_screen(myTempTime, myTemp, ptTemp, CV19ss, CV19contact, CV19travel)
 
 ##### Section 2 of 3 - define functions, initiate webdriver, open browser #####
@@ -982,64 +801,18 @@ if __name__ == "__main__":
     ##### Section 3 of 3 - Autofill forms and pages #####
 
 
-    #### SOC ROC report
+    #### fill out SOC ROC report
     utils.comm_note(driver, patientName, text=SOCrocReport)
 
-
     ##### 1 Patient Tracking
-    # page = "Patient Tracking"
-
-    utils.patient_tracking(driver, patientName, visitStartTime, visitEndTime, evalDate, ROC, insurance, 
-                           caregiverName, caregiverRltnshp, caregiverPhone)
-    '''
-    input(f'{patientName} AUTOFILL {page}')
-
-    try:
-        driver.find_element_by_id("cTO_timein").send_keys(visitStartTime)  # timeIn
-        driver.find_element_by_id("cTO_timeout").send_keys(visitEndTime)  # timeOut
-
-        driver.find_element_by_id("cTO_visitdate").click()  # visitDate
-        driver.find_element_by_id("cTO_visitdate").send_keys(evalDate)  # visit date
-
-
-        #driver.find_element_by_id("M0032_ROC_DT_NA").send_keys(Keys.SPACE)  # ROC button
-
-
-        # A1110 Language
-        if ROC == 0:
-            driver.find_element_by_id("A1110A").send_keys("English")
-            driver.find_element_by_id("A1110B_1").send_keys(Keys.SPACE)
-        elif ROC == 1:
-            print("check language selection")
-
-        if insurance == 'mcr':
-            driver.find_element_by_id('M0150_CPAY_MCARE_FFS').send_keys(Keys.SPACE)
-        elif insurance == 'mcrother':
-            driver.find_element_by_id('M0150_CPAY_MCARE_HMO').send_keys(Keys.SPACE)
-        elif insurance == 'com':
-            driver.find_element_by_id('M0150_CPAY_PRIV_INS').send_keys(Keys.SPACE)
-
-        enterCGinfo = input("Enter 'Emergency Contact'? yes or <enter>: ")
-        if 'y' in enterCGinfo.lower():
-            try:
-                driver.find_element_by_id('cEC_ContactName').send_keys(caregiverName)
-                driver.find_element_by_id('cEC_ContactRelationship').send_keys(caregiverRltnshp)
-                driver.find_element_by_id('cEC_EmergencyPhoneA').send_keys(caregiverPhone[0])
-                driver.find_element_by_id('cEC_EmergencyPhoneB').send_keys(caregiverPhone[1])
-                driver.find_element_by_id('cEC_EmergencyPhoneC').send_keys(caregiverPhone[2])
-            except:
-                print("You need to manually enter contact info. Something is not right with it.")
-
-    except:
-        PAE()
-
-    scroll_up_then_pause()  # pause to finish and inspect page
-    '''
+    utils.patient_tracking(driver, patientName, visitStartTime, visitEndTime, evalDate, ROC, 
+                           insurance, caregiverName, caregiverRltnshp, caregiverPhone)
 
     ##### 2 Administrative
+    utils.administrative(driver, patientName, evalDate, dcDate, medDx)
+    '''
     page = "Administrative"
     input(f'{patientName} AUTOFILL {page}')
-
     try:
         driver.find_element_by_id("M0090_INFO_COMPLETED_DT").click()  # assessment date
         driver.find_element_by_id("M0090_INFO_COMPLETED_DT").send_keys(Keys.BACK_SPACE * 8)
@@ -1071,9 +844,12 @@ if __name__ == "__main__":
         PAE()
 
     scroll_up_then_pause()  # pause to finish and inspect page
-
+    '''
 
     ##### 3 Vitals
+    utils.vitals(driver, previousPatient, ptPulse, ptTemp, ptRR, ptLBP, ptRBP, ht, wt, 
+           tempHigh, chh_vitals, dm, patientName)
+    '''       
     page = "Vitals"
     pause_to_autofill()
     try:
@@ -1095,27 +871,27 @@ if __name__ == "__main__":
 
         # enter vital sign parameters:
         driver.find_element_by_id("c485np_temphigh").send_keys(tempHigh)  # np_tempHigh
-        driver.find_element_by_id("c485np_templow").send_keys(vitals.temp_low)  # np_tempLow
-        driver.find_element_by_id("c485np_pulsehigh").send_keys(vitals.pulse_high)  # np_pulsehigh
-        driver.find_element_by_id("c485np_pulselow").send_keys(vitals.pulse_low)  # np_pulselow
-        driver.find_element_by_id("c485np_resphigh").send_keys(vitals.resp_high)  # np_resphigh
-        driver.find_element_by_id("c485np_resplow").send_keys(vitals.resp_low)  # np_resplow
-        driver.find_element_by_id("c485np_syshigh").send_keys(vitals.sbp_high)  # np_syshigh
-        driver.find_element_by_id("c485np_syslow").send_keys(vitals.sbp_lLow)  # np_syslow
-        driver.find_element_by_id("c485np_diashigh").send_keys(vitals.dbp_high)  # np_diashigh
-        driver.find_element_by_id("c485NP_DiasLow").send_keys(vitals.dbp_low)  # np_diaslow
-        driver.find_element_by_id("c485np_02stat").send_keys(vitals.o2_low)  # np_02stat
+        driver.find_element_by_id("c485np_templow").send_keys(chh_vitals.temp_low)  # np_tempLow
+        driver.find_element_by_id("c485np_pulsehigh").send_keys(chh_vitals.pulse_high)  # np_pulsehigh
+        driver.find_element_by_id("c485np_pulselow").send_keys(chh_vitals.pulse_low)  # np_pulselow
+        driver.find_element_by_id("c485np_resphigh").send_keys(chh_vitals.resp_high)  # np_resphigh
+        driver.find_element_by_id("c485np_resplow").send_keys(chh_vitals.resp_low)  # np_resplow
+        driver.find_element_by_id("c485np_syshigh").send_keys(chh_vitals.sbp_high)  # np_syshigh
+        driver.find_element_by_id("c485np_syslow").send_keys(chh_vitals.sbp_lLow)  # np_syslow
+        driver.find_element_by_id("c485np_diashigh").send_keys(chh_vitals.dbp_high)  # np_diashigh
+        driver.find_element_by_id("c485NP_DiasLow").send_keys(chh_vitals.dbp_low)  # np_diaslow
+        driver.find_element_by_id("c485np_02stat").send_keys(chh_vitals.o2_low)  # np_02stat
         if dm == 1:
-            driver.find_element_by_id("c485np_fastbslevelgt").send_keys(vitals.fast_bs_High)
-            driver.find_element_by_id("c485np_fastbslevellt").send_keys(vitals.fast_bs_low)
-            driver.find_element_by_id("c485np_randombslevelgt").send_keys(vitals.rand_bs_high)
-            driver.find_element_by_id("c485np_randombslevellt").send_keys(vitals.rand_bs_low)
+            driver.find_element_by_id("c485np_fastbslevelgt").send_keys(chh_vitals.fast_bs_High)
+            driver.find_element_by_id("c485np_fastbslevellt").send_keys(chh_vitals.fast_bs_low)
+            driver.find_element_by_id("c485np_randombslevelgt").send_keys(chh_vitals.rand_bs_high)
+            driver.find_element_by_id("c485np_randombslevellt").send_keys(chh_vitals.rand_bs_low)
 
     except:
         PAE()
 
     scroll_up_then_pause()  # pause to finish and inspect page
-
+    '''
 
     ##### 4 Patient History and Prognosis
     page = "Patient History and Prognosis"
@@ -1794,8 +1570,6 @@ if __name__ == "__main__":
         PAE()
 
     scroll_up_then_pause()  # pause to finish and inspect page
-
-
 
 
     ##### 17 Swallowing_Nutritional Status  # M2102_f_01

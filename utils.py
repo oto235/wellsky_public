@@ -4,6 +4,10 @@ import hidden_vars
 sys.path.append(hidden_vars.filepath_selenium)
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+sys.path.append(hidden_vars.filepath_CHH)
+import chh
+
+# vitals = chh.Vitals()
 
 # Initialize webdriver.
 def webdriver_init(filepath_webdriver):
@@ -35,16 +39,6 @@ def scroll_up_then_pause(driver, page):
     driver.find_element_by_tag_name('html').send_keys(Keys.HOME)
     input(f"'Save & Cont' {page}.")
     driver.find_element_by_id("oasisSaveContinueButton").click()  # 'save and continue'
-
-# Clear previous entries. Mostly used when seeing a previous patient
-def clearLink(linksToClear):
-    for i in range(len(linksToClear)):
-        driver.find_element_by_id('clearLink' + str(linksToClear[i])).click()
-    input("<Enter> when all sections cleared and ready to autofill page")
-
-# dummy function to test f strings
-def funct(patientName, page):
-    print(f'here we have {patientName} on page {page}')
 
 # Create the SOC/ROC report to go in the comm note
 def SOC_ROC_report(age, gender, approach, side, joint, effect, relevantMedHx, woundDesc,
@@ -107,7 +101,7 @@ def comm_note(driver, patientName, text):
         autofill_error(page, patientName)
 
 # Generate general interventions; everyone admitted gets them.
-def general_inteventions():
+def general_interventions():
     string = """Patient was identified with 2+ forms of ID: DOB, name, and ____ caregiver \
 confirmation. Patient agreed w/ provision of HHC. Consents signed for care.
 
@@ -275,6 +269,18 @@ Provider follow-up at 2 weeks post op.  Call surgeon if no BM after 5 days. {TED
 {painPumpBlurb} {painPumpOrders}"""
     return string
 
+# enter a date, click on box, delete anything there, enter new date
+def enter_date(driver, id, date):
+    driver.find_element_by_id(id).click()
+    driver.find_element_by_id(id).send_keys(Keys.BACK_SPACE * 8)
+    driver.find_element_by_id(id).send_keys(date)
+
+# Clear previous entries from previous episode/visit
+def clear_link(driver, linksToClear):
+    for i in range(len(linksToClear)):
+        driver.find_element_by_id('clearLink' + str(linksToClear[i])).click()
+    input("<Enter> when all sections cleared and ready to autofill page")
+
 # Page 1 of EMR 
 def patient_tracking(driver, patientName, visitStartTime, visitEndTime, evalDate, ROC, insurance, 
                            caregiverName, caregiverRltnshp, caregiverPhone):
@@ -286,10 +292,6 @@ def patient_tracking(driver, patientName, visitStartTime, visitEndTime, evalDate
 
         driver.find_element_by_id("cTO_visitdate").click()  # visitDate
         driver.find_element_by_id("cTO_visitdate").send_keys(evalDate)  # visit date
-
-
-        #driver.find_element_by_id("M0032_ROC_DT_NA").send_keys(Keys.SPACE)  # ROC button
-
 
         # A1110 Language
         if ROC == 0:
@@ -321,9 +323,91 @@ def patient_tracking(driver, patientName, visitStartTime, visitEndTime, evalDate
 
     scroll_up_then_pause(driver, page)  # pause to finish and inspect page
 
-# TODO Pages 2-24 of EMR after successful testing of Page 1 of EMR and other changes 
-# TODO Testing will occur 2-17-24
+# Page 2 of EMR
+def administrative(driver, patientName, evalDate, dcDate, medDx):
+    page = "Administrative"
+    input(f'{patientName} AUTOFILL {page}')
+    try:
+        # driver.find_element_by_id("M0090_INFO_COMPLETED_DT").click()  # assessment date
+        # driver.find_element_by_id("M0090_INFO_COMPLETED_DT").send_keys(Keys.BACK_SPACE * 8)
+        # driver.find_element_by_id("M0090_INFO_COMPLETED_DT").send_keys(evalDate)
+        
+        # assessment date
+        enter_date(driver, "M0090_INFO_COMPLETED_DT", evalDate)
+
+        driver.find_element_by_id("M0102_PHYSN_ORDRD_SOCROC_DT_NA").send_keys(Keys.SPACE)
+
+        driver.find_element_by_id("M0104_PHYSN_RFRL_DT").click()  # MD ordered date
+        driver.find_element_by_id("M0104_PHYSN_RFRL_DT").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id("M0104_PHYSN_RFRL_DT").send_keys(dcDate)
+
+        driver.find_element_by_id("M0110_01").send_keys(Keys.SPACE)  # 'early' episode
+
+        # A1250 Transportation
+        driver.find_element_by_id("A1250C").send_keys(Keys.SPACE)
+
+        # M1000 Inpatient Facilities DC'ed from
+        driver.find_element_by_id("M1000_DC_IPPS_14_DA").send_keys(Keys.SPACE)  # M1000 in-patient stay
+
+        # M1005 Inpatient DC date
+        driver.find_element_by_id("M1005_INP_DISCHARGE_DT").click()  # M1005 InP dc date
+        driver.find_element_by_id("M1005_INP_DISCHARGE_DT").send_keys(Keys.BACK_SPACE * 8)
+        driver.find_element_by_id("M1005_INP_DISCHARGE_DT").send_keys(dcDate)
+
+        # M1005 why inpatient stay
+        driver.find_element_by_id("c_m1005comment").send_keys(medDx)  # M1005comment
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
     
+# Page 3 of EMR
+def vitals(driver, previousPatient, ptPulse, ptTemp, ptRR, ptLBP, ptRBP, ht, wt, 
+           tempHigh, chh_vitals, dm, patientName):
+    page = "Vitals"
+    pause_to_autofill(page)
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [2]
+        if previousPatient == 1:
+            clear_link(driver, linksToClear)
+
+        # enter patient vitals:
+        driver.find_element_by_id("cVS_pulseradical").send_keys(ptPulse)  # pulse
+        driver.find_element_by_id("PulseRadicalRegular1").send_keys(Keys.SPACE)  # pulseReg
+        driver.find_element_by_id("cVS_temperature").send_keys(ptTemp)  # temp
+        driver.find_element_by_id("cVS_respiratory").send_keys(ptRR)  # resp
+        driver.find_element_by_id("cVS_bplsitting").send_keys(ptLBP)  # left arm bp, sitting
+        driver.find_element_by_id("cVS_bprsitting").send_keys(ptRBP)  # right arm bp, sitting
+        driver.find_element_by_id("cVS_height").send_keys(str(ht) + " inches")  # height
+        driver.find_element_by_id("cVS_weight").send_keys(str(wt) + " lbs")  # weight
+        driver.find_element_by_id("cActual2").send_keys(Keys.SPACE)  # "stated" ht and wt
+
+        # enter vital sign parameters:
+        driver.find_element_by_id("c485np_temphigh").send_keys(tempHigh)  # np_tempHigh
+        driver.find_element_by_id("c485np_templow").send_keys(chh_vitals.temp_low)  # np_tempLow
+        driver.find_element_by_id("c485np_pulsehigh").send_keys(chh_vitals.pulse_high)  # np_pulsehigh
+        driver.find_element_by_id("c485np_pulselow").send_keys(chh_vitals.pulse_low)  # np_pulselow
+        driver.find_element_by_id("c485np_resphigh").send_keys(chh_vitals.resp_high)  # np_resphigh
+        driver.find_element_by_id("c485np_resplow").send_keys(chh_vitals.resp_low)  # np_resplow
+        driver.find_element_by_id("c485np_syshigh").send_keys(chh_vitals.sbp_high)  # np_syshigh
+        driver.find_element_by_id("c485np_syslow").send_keys(chh_vitals.sbp_lLow)  # np_syslow
+        driver.find_element_by_id("c485np_diashigh").send_keys(chh_vitals.dbp_high)  # np_diashigh
+        driver.find_element_by_id("c485NP_DiasLow").send_keys(chh_vitals.dbp_low)  # np_diaslow
+        driver.find_element_by_id("c485np_02stat").send_keys(chh_vitals.o2_low)  # np_02stat
+        if dm == 1:
+            driver.find_element_by_id("c485np_fastbslevelgt").send_keys(chh_vitals.fast_bs_High)
+            driver.find_element_by_id("c485np_fastbslevellt").send_keys(chh_vitals.fast_bs_low)
+            driver.find_element_by_id("c485np_randombslevelgt").send_keys(chh_vitals.rand_bs_high)
+            driver.find_element_by_id("c485np_randombslevellt").send_keys(chh_vitals.rand_bs_low)
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
+
 # used for testing functions
 if __name__ == "__main__":
     
