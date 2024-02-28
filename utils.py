@@ -1,4 +1,4 @@
-import traceback, sys
+import traceback, sys, time
 import hidden_vars
 # add file path for selenium depending on installation
 sys.path.append(hidden_vars.filepath_selenium)
@@ -7,7 +7,6 @@ from selenium.webdriver.common.keys import Keys
 sys.path.append(hidden_vars.filepath_CHH)
 import chh
 
-# vitals = chh.Vitals()
 
 # Initialize webdriver.
 def webdriver_init(filepath_webdriver):
@@ -407,6 +406,428 @@ def vitals(driver, previousPatient, ptPulse, ptTemp, ptRR, ptLBP, ptRBP, ht, wt,
         autofill_error(page, patientName)
 
     scroll_up_then_pause(driver, page)  # pause to finish and inspect page
+
+# Page 4 of EMR
+def patient_history_and_prognosis(driver, ROC, previousPatient, side, joint, effect, PMHfull,
+                                  PSxH, incontinence, PMH, pna, flu, covid, livingWill, 
+                                  agencyRCVDcopy, MPOA, DNR, MPOAname, MPOAphone, patientName):
+    page = "Patient History and Prognosis"
+    # pause_to_autofill()
+    try:
+        # clear form from previous episode:
+        linksToClear = [1,2,4,8]
+        if ROC == 1:
+            linksToClear = [1,2]
+        if previousPatient == 1:
+            clear_link(driver, linksToClear)
+
+        # PMH list with check boxes and comments
+        driver.find_element_by_id("cMH_osteoarthritis").send_keys(Keys.SPACE)  # OA
+        driver.find_element_by_id("cMH_osteoarthritissites").send_keys(f'{side}{joint}')
+
+        if 'TKR' in effect or 'THR' in effect or 'replacement' in effect:
+            driver.find_element_by_id("cMH_jointreplacement").send_keys(Keys.SPACE)  # jointReplacementBox
+            driver.find_element_by_id("cMH_joint").send_keys(f'{side}{joint}')  # jointReplacmentComment
+
+        driver.find_element_by_id("cMH_other").send_keys(Keys.SPACE)  # 'other'
+        driver.find_element_by_id("cMH_otherdetails").send_keys(PMHfull)  # 'other' comments
+
+        if PSxH != '':
+            driver.find_element_by_id('cMH_surghistory').send_keys(Keys.SPACE)  # past sx hx
+            driver.find_element_by_id('cMH_surghistorydetails').send_keys(PSxH)  # pas sx hx comments
+
+        if incontinence >= 1:
+            driver.find_element_by_id('cMH_urinaryincont').send_keys(Keys.SPACE)
+
+        if "HTN" in PMH:
+            driver.find_element_by_id("cMH_htn").send_keys(Keys.SPACE)
+
+        # Immunizations
+        if pna == 1:
+            driver.find_element_by_id('pY').send_keys(Keys.SPACE)
+        elif pna == 0:
+            driver.find_element_by_id('pN').send_keys(Keys.SPACE)
+        if flu == 1:
+            driver.find_element_by_id('fY').send_keys(Keys.SPACE)
+        elif flu == 0:
+            driver.find_element_by_id('fN').send_keys(Keys.SPACE)
+        if covid == 1:
+            driver.find_element_by_id('add1Y').send_keys(Keys.SPACE)
+            driver.find_element_by_id('cImm_add1info').send_keys('COVID')
+
+        # Health Screeing
+        # nothing to autofill
+
+        # Advanced Directives
+        if livingWill == 1 or MPOA == 1 or DNR == 1:
+            driver.find_element_by_id('phad1').send_keys(Keys.SPACE)
+            time.sleep(1)
+            if agencyRCVDcopy == 1:
+                driver.find_element_by_id('cofaa1').send_keys(Keys.SPACE)  # for pink box
+            if agencyRCVDcopy == 0:
+                driver.find_element_by_id('cofaa2').send_keys(Keys.SPACE)  # for pink box
+        if DNR == 1:
+            driver.find_element_by_id('addnr').send_keys(Keys.SPACE)
+            # driver.find_element_by_id('pd0').send_keys(Keys.SPACE)  # can't find this on webpage
+        if DNR == 0:
+            pass
+            # driver.find_element_by_id('pd1').send_keys(Keys.SPACE)
+        if livingWill == 1:
+            driver.find_element_by_id('adlw').send_keys(Keys.SPACE)
+        if MPOA == 1:
+            driver.find_element_by_id('admpoa').send_keys(Keys.SPACE)
+            driver.find_element_by_id('admpoan').send_keys(MPOAname)
+            driver.find_element_by_id('admpoap1').send_keys(MPOAphone[0])
+            driver.find_element_by_id('admpoap2').send_keys(MPOAphone[1])
+            driver.find_element_by_id('admpoap3').send_keys(MPOAphone[2])
+
+        if livingWill == 0 and MPOA == 0 and DNR == 0:
+            driver.find_element_by_id('phad2').send_keys(Keys.SPACE)  # pink box first question
+
+        if agencyRCVDcopy == 1:
+            driver.find_element_by_id('frm_ACPrecordDocumentedYes').send_keys(Keys.SPACE)  # for purple box
+        if agencyRCVDcopy == 0:
+            driver.find_element_by_id('frm_ACPrecordDocumentedNo').send_keys(Keys.SPACE)  # for purple box
+
+        # surragate decision maker
+        driver.find_element_by_id('hs2').send_keys(Keys.SPACE)  # for pink box
+        driver.find_element_by_id('frm_ACPsurrRecordDocumentedNo').send_keys(Keys.SPACE)  # for purple box
+
+        # patient provided written/verbal info re advance directives
+        driver.find_element_by_id('pwpwvi1').send_keys(Keys.SPACE)
+
+        # prognosis
+        driver.find_element_by_id('pp3').send_keys(Keys.SPACE)
+
+        # functional limitations
+        driver.find_element_by_id('c485FI_ambulation').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485FI_endurance').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485FI_dyspnea').send_keys(Keys.SPACE)
+        if incontinence >= 1:
+            driver.find_element_by_id('c485FI_bowelincont').send_keys(Keys.SPACE)
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
+
+# Page 5 of EMR
+def hearing_speech_vision(driver, previousPatient, hearing, ROC, vision, 
+                          health_lit, patientName):
+    page = "Hearing, Speech, and Vision"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1]
+        if previousPatient == 1:
+            clear_link(driver, linksToClear)
+
+        driver.find_element_by_id('cSS_wnl').send_keys(Keys.SPACE)  # eyes
+        driver.find_element_by_id('cSS_nosewnl').send_keys(Keys.SPACE)  # nose
+        # B0200 Hearing
+        if hearing is not None:
+            if ROC == 0:
+                driver.find_element_by_id(f"B0200_0{hearing}").send_keys(Keys.SPACE)
+            elif ROC ==1:
+                print("check ROC selections on this page")
+            if hearing == 0:
+                driver.find_element_by_id("cSS_earswnl").send_keys(Keys.SPACE)
+        # B1000 Vision
+        if vision is not None:
+            driver.find_element_by_id(f"B1000_0{vision}").send_keys(Keys.SPACE)
+        # B1300 Health Literacy
+        if health_lit is not None:
+            driver.find_element_by_id(f"B1300_{health_lit}").send_keys(Keys.SPACE)
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
+
+# Page 6 of EMR
+def cog_mood_behav(driver, previousPatient, psychosocial_factors, c_rep_3_words, c_year,
+                   c_month, c_day_of_week, c_400_sock, c_400_blue, c_400_bed, delirium,
+                   social_isol, anxiety, cog_impairment, patientName):    
+    page = "Cog, Mood, Behav"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1]
+        if previousPatient == 1:
+            clear_link(driver, linksToClear)
+
+        # Mental status
+        orientation = ['person', 'time', 'place', 'situation']
+        for thing in orientation:
+            driver.find_element_by_id(f'CA485_MS_{thing}_Ori').send_keys(Keys.SPACE)
+        # driver.find_element_by_id('CA485_MS_person_Ori').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_memoryNoProblems').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_neuroNoProblems').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_behavioralAppropriateWNL').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_moodAppropriateWNL').send_keys(Keys.SPACE)
+        driver.find_element_by_id('CA485_MS_pyschosocial').send_keys(psychosocial_factors)
+
+        # C0100
+        driver.find_element_by_id('CC0100_01').send_keys(Keys.SPACE)
+
+        # C0200
+        driver.find_element_by_id(f'CC0200_0{c_rep_3_words}').send_keys(Keys.SPACE)
+
+        # C0300
+        driver.find_element_by_id(f'CC0300A_0{c_year}').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'CC0300B_0{c_month}').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'CC0300C_0{c_day_of_week}').send_keys(Keys.SPACE)
+
+        # C0400
+        driver.find_element_by_id(f'CC0400A_0{c_400_sock}').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'CC0400B_0{c_400_blue}').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'CC0400C_0{c_400_bed}').send_keys(Keys.SPACE)
+
+        # C0500 - it is autocalculated
+
+        # C1310
+        if delirium == 0:
+            driver.find_element_by_id('CC1310A_0').send_keys(Keys.SPACE)
+            driver.find_element_by_id('CC1310B_0').send_keys(Keys.SPACE)
+            driver.find_element_by_id('CC1310C_0').send_keys(Keys.SPACE)
+            driver.find_element_by_id('CC1310D_0').send_keys(Keys.SPACE)
+
+        # D 0700 Social Isolation
+        driver.find_element_by_id(f'D0700_{social_isol}').send_keys(Keys.SPACE)
+
+        # M questions
+        driver.find_element_by_id('M1700_00').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1710_00').send_keys(Keys.SPACE)
+        driver.find_element_by_id(f'M1720_0{anxiety}').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1740_BD_NONE').send_keys(Keys.SPACE)
+        driver.find_element_by_id('M1745_00').send_keys(Keys.SPACE)
+
+        if anxiety > 1:
+            driver.find_element_by_id('CA485_MS_anxious').send_keys(Keys.SPACE)
+
+        if cog_impairment == 1:
+            driver.find_element_by_id('CA485_MS_forgetful_E').send_keys(Keys.SPACE)
+            driver.find_element_by_id('M1700_01').send_keys(Keys.SPACE)
+            driver.find_element_by_id('M1710_01').send_keys(Keys.SPACE)
+            #driver.find_element_by_id('c485MS_forgetful').send_keys(Keys.SPACE)
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
+
+# Page 7 of EMR
+def pref_cust_rout_act(driver, previousPatient, patient_care_prefs, patientName):
+    page = "Pref Cust Rout Act"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [3, 4, 5]
+        if previousPatient == 1:
+            clear_link(driver, linksToClear)
+
+        driver.find_element_by_id('M2102_f_00').send_keys(Keys.SPACE)
+
+        # types of assistance
+        driver.find_element_by_id('cToF_adlfamily').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cTof_iadlfamily').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cTof_psychfamily').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cToF_assistfamily').send_keys(Keys.SPACE)
+        driver.find_element_by_id('cToF_financefamily').send_keys(Keys.SPACE)
+
+        driver.find_element_by_id('cSA_names').send_keys('family/friends')
+
+        driver.find_element_by_id('ca2').send_keys(Keys.SPACE)
+        driver.find_element_by_id('ca4').send_keys(Keys.SPACE)
+        driver.find_element_by_id('ca6').send_keys(Keys.SPACE)
+        driver.find_element_by_id('ca8').send_keys(Keys.SPACE)
+        driver.find_element_by_id('ca10').send_keys(Keys.SPACE)
+        driver.find_element_by_id('financialAssist3').send_keys(Keys.SPACE)
+
+        driver.find_element_by_id('frm_patientCarePreferences').send_keys(patient_care_prefs)
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
+
+# Page 8 of EMR
+def enviro_cond(driver, previousPatient, anticoagulant, livingSituation, equipDict, 
+                patientName):
+    page = "Enviro Cond"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1,2,3]
+        if previousPatient == 1:
+            clear_link(driver, linksToClear)
+
+        # Safety measures
+        if anticoagulant == 1:
+            driver.find_element_by_id('c485SM_anticoagulant').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_pathclear').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_standardpos').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_emergplan').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_ambulation').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_fall').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_adls').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_devices').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_safetymeasures').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_mobsafety').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_dmesafety').send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485SM_displan').send_keys(Keys.SPACE)
+
+        driver.find_element_by_id('c485SM_riskcode').send_keys('III')
+        driver.find_element_by_id('c485SM_disastercode').send_keys('LOW')
+
+        # Safety/sanitation hazards affecting patient
+        if 'no hazards' in livingSituation.lower():
+            driver.find_element_by_id('cSH_nohazards').send_keys(Keys.SPACE)
+        if 'stairs' in livingSituation.lower():
+            driver.find_element_by_id('cSH_stairs').send_keys(Keys.SPACE)
+        if 'narrow' in livingSituation.lower():
+            driver.find_element_by_id('cSH_walkway').send_keys(Keys.SPACE)
+        if 'cluttered' in livingSituation.lower() or 'soiled' in livingSituation.lower():
+            driver.find_element_by_id('cSH_soiledarea').send_keys(Keys.SPACE)
+        if 'rug' in livingSituation.lower():
+            driver.find_element_by_id('cSH_otherdetails').send_keys('rugs ')
+        if 'pet' in livingSituation.lower():
+            driver.find_element_by_id('cSH_otherdetails').send_keys('pet(s) ')
+
+        # Fire Assessment for Patients with Oxygen
+        if equipDict['oxygen'] == 0:
+            driver.find_element_by_id('cFA_isuseoxygen').send_keys(Keys.SPACE)
+        elif equipDict['oxygen'] ==1:
+            driver.find_element_by_id('c485SM_o2').send_keys(Keys.SPACE)
+            driver.find_element_by_id('c485EMan_suppliesdmeprov').send_keys("Oxygen")
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
+
+# Page 9 of EMR
+def functional_status(driver, previousPatient, wbStatus, GG0170SOCROC_dict, side, joint,
+                      M1800_dict, age, diagnosis_3_plus, fall_in_last_3_mo, visual_impairment,
+                      environmental_hzds, poly_pharm_4_plus, cog_impairment, incontinence,
+                      tug, equipDict, equipDictOther, catheterType, patientName):
+    page = "Functional Status"
+
+    try:
+        # clear form from previous episode:
+        linksToClear = [1,2,11,12,14]
+        if previousPatient == 1:
+            clear_link(driver, linksToClear)
+
+        # Activities Permitted:
+        driver.find_element_by_id("c485AP_walker").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485AP_expres").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485AP_tbedchair").send_keys(Keys.SPACE)
+        driver.find_element_by_id('c485AP_msother').send_keys(wbStatus)
+        if GG0170SOCROC_dict['Q1'] == '1':
+            driver.find_element_by_id('c485AP_wheelchair').send_keys(Keys.SPACE)
+
+        # Musculoskeletal:
+        driver.find_element_by_id("cMSk_weakness").send_keys(Keys.SPACE)  # mskWeakness
+        driver.find_element_by_id("cMSk_ambdifficult").send_keys(Keys.SPACE)  # mskAmbDifficult
+        driver.find_element_by_id("cMSk_limitmob").send_keys(Keys.SPACE)  # mskLimitMobBox
+        driver.find_element_by_id("cMSk_limitedmobdesc").send_keys(f'{side}{joint}')  # mskLimitedMobComment
+        driver.find_element_by_id("cMSk_jointstiff").send_keys(Keys.SPACE)  # mskJointStiffBox
+        driver.find_element_by_id("cMSk_jointstiffdesc").send_keys(f'{side}{joint}')  # mskJointStiffComment
+        driver.find_element_by_id("cMSk_pbalance").send_keys(Keys.SPACE)  # mskPBalance
+        driver.find_element_by_id("cMSk_assistdev").send_keys(Keys.SPACE)  # mskAssistDevBox
+        driver.find_element_by_id("cMSk_assistdevdesc").send_keys("2 wheel walker")  # mskAssistDevComment
+
+        # M1800 questions and my default answers:
+        driver.find_element_by_id("M1800_" + M1800_dict['M1800']).send_keys(Keys.SPACE)  # grooming
+        driver.find_element_by_id("M1810_" + M1800_dict['M1810']).send_keys(Keys.SPACE)  # upper body dressing
+        driver.find_element_by_id("M1820_" + M1800_dict['M1820']).send_keys(Keys.SPACE)  # lower body dressing
+        driver.find_element_by_id("M1830_" + M1800_dict['M1830']).send_keys(Keys.SPACE)  # bathing
+        driver.find_element_by_id("M1840_" + M1800_dict['M1840']).send_keys(Keys.SPACE)  # toilet trsfr
+        driver.find_element_by_id("M1845_" + M1800_dict['M1845']).send_keys(Keys.SPACE)  # toilet hygiene
+        driver.find_element_by_id("M1850_" + M1800_dict['M1850']).send_keys(Keys.SPACE)  # transferring
+        driver.find_element_by_id("M1860_" + M1800_dict['M1860']).send_keys(Keys.SPACE)  # ambulation
+
+        # MAHC 10 Risk assessment tool
+        if age == '':
+            print('Enter age: (you only get one chance)')
+            age = input()
+        if int(age) >= 65:
+            driver.find_element_by_id("a1").send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id("a2").send_keys(Keys.SPACE)
+
+        if diagnosis_3_plus == 1:
+            driver.find_element_by_id('m1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('m2').send_keys(Keys.SPACE)
+
+        if fall_in_last_3_mo == 1:
+            driver.find_element_by_id('c1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('c2').send_keys(Keys.SPACE)
+
+        if visual_impairment > 0:
+            driver.find_element_by_id('r1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('r2').send_keys(Keys.SPACE)
+
+        if environmental_hzds == 1:
+            driver.find_element_by_id('j1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('j2').send_keys(Keys.SPACE)
+
+        if poly_pharm_4_plus == 1:
+            driver.find_element_by_id('n1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('n2').send_keys(Keys.SPACE)
+
+        if cog_impairment == 1:
+            driver.find_element_by_id('e1').send_keys(Keys.SPACE)
+        else:
+            driver.find_element_by_id('e2').send_keys(Keys.SPACE)
+
+        if int(incontinence) >= 1:
+            driver.find_element_by_id("k1").send_keys(Keys.SPACE)
+        if int(incontinence) == 0:
+            driver.find_element_by_id("k2").send_keys(Keys.SPACE)
+
+        driver.find_element_by_id("s1").send_keys(Keys.SPACE)  # impaired funcational mobility
+        driver.find_element_by_id("d1").send_keys(Keys.SPACE)  # pain affecting level of function
+
+        # TUG test
+        driver.find_element_by_id("cTUGseconds").send_keys(tug)
+
+        # DME checkboxes
+        for key, value in equipDict.items():
+            if value == 1:
+                driver.find_element_by_id("c485EMan_" + key).send_keys(Keys.SPACE)
+
+        # DME other comment box
+        for key, value in equipDictOther.items():
+            if value == 1:
+                dme = str(key).replace('_', ' ')
+                driver.find_element_by_id("c485EMan_dmeother").send_keys(f'{dme}, ')
+
+        # Supplies
+        driver.find_element_by_id("c485EMan_abds").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_gauzepads").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_acewrap").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_suppliesdress").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_tape").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_alcoholpads").send_keys(Keys.SPACE)
+        driver.find_element_by_id("c485EMan_exgloves").send_keys(Keys.SPACE)
+        if catheterType.lower() == 'foley':
+            driver.find_element_by_id("c485EMan_foleycath").send_keys(Keys.SPACE)
+
+    except:
+        autofill_error(page, patientName)
+
+    scroll_up_then_pause(driver, page)  # pause to finish and inspect page
+
+# Page 10 of EMR
+    # coming soon (to a theater near you)
+
 
 # used for testing functions
 if __name__ == "__main__":
