@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup as bs
 # insert file name here
 import patient_specific_filename as pt
 
-
 # TODO GOALS!
 # TODO FLU shot should only answer if it applies to Oct 1 - March 31
 
